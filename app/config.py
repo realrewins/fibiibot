@@ -20,6 +20,9 @@ def load_env_manually():
 
 load_env_manually()
 
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+VOD_FOLDER = os.path.join(BASE_DIR, 'vod')
+
 # ========== BASE-KONFIGURATION ==========
 BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000').rstrip('/')
 SESSION_COOKIE_SECURE = BASE_URL.startswith('https://')

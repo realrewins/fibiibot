@@ -464,12 +464,25 @@ async function sendNotification() {
 
     const { all, users, roles, message, sender } = window.pendingNotification;
 
+    let recipients_type = null;
+    let recipients = [];
+
+    if (all) {
+        recipients_type = 'all';
+        recipients = [];
+    } else if (roles && roles.length > 0) {
+        recipients_type = 'roles';
+        recipients = roles;
+    } else {
+        recipients_type = 'users';
+        recipients = users || [];
+    }
+
     const payload = {
-        all: all,
-        users: users,
-        roles: roles,
-        message: message,
-        sender: sender
+        recipients_type,
+        recipients,
+        message,
+        sender
     };
 
     try {

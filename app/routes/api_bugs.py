@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from app.decorators import login_required, api_role_required
 from app.auth import validate_csrf, generate_csrf_token, login_required_api
 from app.audit_logger import add_audit_log
-from app.config import BUG_REPORT_FILE
+from app.config import BUG_REPORT_FILE, NOTIFICATION_FILE  # <-- FIX
 
 bugs_bp = Blueprint('bugs', __name__, url_prefix='/api')
 bug_lock = threading.Lock()
@@ -110,7 +110,15 @@ def update_bug_report(report_id):
                 break
         if not report:
             return jsonify({'error': 'Report not found'}), 404
+
+        # FIX: timestamp NICHT ändern (zur Sicherheit festhalten)
+        original_ts = report.get('timestamp')
+
         report['status'] = status
+
+        if original_ts is not None:
+            report['timestamp'] = original_ts
+
         with open(BUG_REPORT_FILE, 'w', encoding='utf-8') as f:
             json.dump(reports, f, ensure_ascii=False, indent=2)
     add_audit_log(
@@ -132,36 +140,51 @@ def update_bug_report(report_id):
 def send_bug_reply():
     if not validate_csrf():
         return jsonify({'error': 'Invalid CSRF token'}), 403
-    data = request.json
+
+    data = request.json or {}
     target_user = data.get('target_user')
-    message = data.get('message')
+    message = (data.get('message') or '').strip()
     bug_id = data.get('bug_id')
     if not target_user or not message or not bug_id:
         return jsonify({'error': 'Missing fields'}), 400
-    reply = {
+
+    # FIX: in notification.json speichern (nicht bug_report.json)
+    notif = {
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'from_user': session['user']['name'],
-        'target_user': target_user,
-        'bug_id': bug_id,
         'message': message,
-        'read': False
+        'type': 'bug_reply',
+        'target_users': [target_user],
+        'target_roles': [],
+        'read_by': {target_user: False},
+        'bug_id': bug_id
     }
+
     with bug_lock:
         try:
-            with open(BUG_REPORT_FILE, 'r', encoding='utf-8') as f:
-                replies = json.load(f)
+            with open(NOTIFICATION_FILE, 'r', encoding='utf-8') as f:
+                notifs = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
-            replies = []
-        replies.append(reply)
-        with open(BUG_REPORT_FILE, 'w', encoding='utf-8') as f:
-            json.dump(replies, f, ensure_ascii=False, indent=2)
+            notifs = []
+
+        if not isinstance(notifs, list):
+            notifs = []
+
+        notifs.append(notif)
+
+        with open(NOTIFICATION_FILE, 'w', encoding='utf-8') as f:
+            json.dump(notifs, f, ensure_ascii=False, indent=2)
+
+        # Für Audit: Bugsubject aus Bugreport laden
         try:
             with open(BUG_REPORT_FILE, 'r', encoding='utf-8') as f:
                 reports = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             reports = []
-    report = next((r for r in reports if r.get('id') == bug_id), None)
-    subject = report['subject'] if report else bug_id
+
+    report = next((r for r in reports if isinstance(r, dict) and r.get('id') == bug_id), None)
+    subject = report['subject'] if report and 'subject' in report else bug_id
+
     add_audit_log(
         username=session['user']['name'],
         user_id=session['user']['id'],

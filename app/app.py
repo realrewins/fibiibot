@@ -143,16 +143,17 @@ def init_database():
     except Exception as e:
         print(f"Keine Konvertierung nötig oder Fehler: {e}")
 
-    # Migration für Bug-Reports
+    # Migration für Bug-Reports (FIX: kein KeyError wenn username fehlt)
     bug_path = os.path.join(DATA_FOLDER, 'bug_report.json')
     try:
         with open(bug_path, 'r', encoding='utf-8') as f:
             reports = json.load(f)
         changed = False
         for r in reports:
-            if 'display_name' not in r:
-                r['display_name'] = r['username']
-                changed = True
+            if isinstance(r, dict) and 'username' in r:
+                if 'display_name' not in r:
+                    r['display_name'] = r.get('username', '')
+                    changed = True
         if changed:
             with open(bug_path, 'w', encoding='utf-8') as f:
                 json.dump(reports, f, ensure_ascii=False, indent=2)

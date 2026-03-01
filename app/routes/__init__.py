@@ -14,6 +14,7 @@ from app.routes.api_notifications import notifications_bp
 from app.routes.api_audit import audit_bp
 from app.routes.api_vod import vod_bp
 from app.routes.api_debug import debug_bp
+from app.routes.vod_public import vod_public_bp
 
 def register_blueprints(app):
     """Registriert alle Blueprints"""
@@ -29,3 +30,4 @@ def register_blueprints(app):
     app.register_blueprint(audit_bp)
     app.register_blueprint(vod_bp)
     app.register_blueprint(debug_bp)
+    app.register_blueprint(vod_public_bp)

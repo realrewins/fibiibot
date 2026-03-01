@@ -35,19 +35,5 @@
       "xqirby": true,
       "thisisjonass": true
     }
-  },
-  {
-    "timestamp": "2026-02-15T23:17:44.097698+00:00",
-    "from_user": "xqirby",
-    "message": "hat funktioniert",
-    "type": "system",
-    "bug_id": "20260215231713387089",
-    "target_users": [
-      "xqirby"
-    ],
-    "target_roles": [],
-    "read_by": {
-      "xqirby": true
-    }
   }
 ]

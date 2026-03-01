@@ -2,7 +2,7 @@ venv/
 env/
 .env
 .env.local
-vod/
+/vod/
 __pycache__/
 *.py[cod]
 *.egg-info/

@@ -111,7 +111,6 @@ def download_chatty_settings():
         return "File not found", 404
 
 @vod_bp.route('/vod/<path:filename>')
-@login_required
 def serve_vod(filename):
     return send_from_directory(VOD_FOLDER, filename)
 

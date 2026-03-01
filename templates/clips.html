@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · Clips</title>
+    <link rel="stylesheet" href="/static/design/clips/css/clips.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo" onclick="window.location.href='/'">
+                <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button onclick="window.location.href='/'" class="nav-item {% if current_page == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <div class="nav-divider"></div>
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/guide'" class="nav-item {% if current_page == 'guide' %}active{% endif %}">
+                    <i class="fas fa-book-open"></i>
+                    <span>Modguide</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/clips'" class="nav-item {% if current_page == 'clips' %}active{% endif %}">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Clips</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/suggestions'" class="nav-item {% if current_page == 'suggestions' %}active{% endif %}">
+                    <i class="fas fa-user-slash"></i>
+                    <span>Blacklist</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/giveaway'" class="nav-item {% if current_page == 'giveaway' %}active{% endif %}">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>Giveaway</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster'] %}
+                <button onclick="window.location.href='/bugs'" class="nav-item {% if current_page == 'bugs' %}active{% endif %}" id="navBugReports">
+                    <i class="fas fa-bug"></i>
+                    <span>Bug Reports</span>
+                    <span class="sidebar-bug-badge" id="sidebarBugBadge"></span>
+                </button>
+                {% else %}
+                <div style="display: none;" id="navBugReports"></div>
+                <div style="display: none;" id="sidebarBugBadge"></div>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/bot'" class="nav-item {% if current_page == 'bot' %}active{% endif %}">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>Bot</span>
+                </button>
+                {% endif %}
+                <button onclick="window.location.href='/vod'" class="nav-item {% if current_page == 'vod' %}active{% endif %}">
+                    <i class="fa-solid fa-video"></i>
+                    <span>VOD</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="window.location.href='/settings'" class="nav-item {% if current_page == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </button>
+                <button onclick="logout()" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h1>Clips</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="dev-notice"><i class="fa-solid fa-code"></i> Page in der Entwicklung</div>
+                    <button class="report-btn" id="bugReportBtn">
+                        <i class="fas fa-bug"></i>
+                        <span>Report Bug</span>
+                    </button>
+                    <div class="notification-dropdown-container">
+                        <button class="icon-button" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span id="notificationBadge" class="notification-badge"></span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="dropdown-header">
+                                <i class="fas fa-bell"></i>
+                                <span>Benachrichtigungen</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-container">
+                        <button class="profile-button" id="profileBtn">
+                            <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <img id="dropdownAvatar" src="" alt="">
+                                <div>
+                                    <div id="dropdownName"></div>
+                                    <div id="dropdownRole" class="role-tag"></div>
+                                </div>
+                            </div>
+                            <a href="#" onclick="window.location.href='/settings'; return false;"><i class="fas fa-cog"></i> User-Settings</a>
+                            <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clips-second-row">
+                <div class="custom-dropdown" id="partnerFilterDropdown">
+                    <div class="dropdown-selected" id="selectedPartnerText">
+                        <span>Alle Partner</span>
+                    </div>
+                    <div class="dropdown-options">
+                        <div class="dropdown-option" data-value="all">Alle Partner</div>
+                        <div class="dropdown-option" data-value="kein">Kein Partner</div>
+                        <div class="dropdown-option" data-value="dominos">Dominos</div>
+                        <div class="dropdown-option" data-value="jbl">JBL</div>
+                        <div class="dropdown-option" data-value="more">More</div>
+                        <div class="dropdown-option" data-value="aoste">Aoste</div>
+                    </div>
+                </div>
+
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="clipSearch" class="clip-search" placeholder="Suche nach Titel oder Slug...">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="updateViews()" class="btn-update-views"><i class="fa-solid fa-rotate"></i> Aufrufe aktualisieren</button>
+                    <button onclick="openNewClipModal()" class="btn-add-clip"><i class="fa-solid fa-plus"></i> Neuer Clip</button>
+                </div>
+            </div>
+
+            <table class="twitch-table">
+                <thead>
+                    <tr>
+                        <th style="width: 300px;">Clip</th>
+                        <th style="width: 120px;">Partner</th>
+                        <th style="width: 100px;">Datum</th>
+                        <th style="width: 100px;">Aufrufe</th>
+                        <th style="text-align: right; width: 120px;">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="clipListBody"></tbody>
+            </table>
+        </main>
+    </div>
+
+    <div id="clipModal" class="modal">
+        <div class="bug-modal-content">
+            <div class="bug-modal-header">
+                <h3><i class="fas fa-clipboard"></i> <span id="clipModalTitle">Neuen Clip hinzufügen</span></h3>
+                <button class="modal-close" onclick="closeModal('clipModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <form id="clipForm">
+                    <div class="form-group">
+                        <label for="clipLink">Twitch-Link oder Slug</label>
+                        <input type="text" id="clipLink" placeholder="https://clips.twitch.tv/... oder Slug" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clipName">Name</label>
+                        <input type="text" id="clipName" placeholder="Wird automatisch geladen" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clipPartner">Partner</label>
+                        <div class="custom-dropdown modal-dropdown" id="modalPartnerDropdown">
+                            <div class="dropdown-selected" id="modalSelectedPartner">
+                                <span>Kein Partner</span>
+                            </div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="kein">Kein Partner</div>
+                                <div class="dropdown-option" data-value="dominos">Dominos</div>
+                                <div class="dropdown-option" data-value="jbl">JBL</div>
+                                <div class="dropdown-option" data-value="more">More</div>
+                                <div class="dropdown-option" data-value="aoste">Aoste</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="clipPartner" value="kein">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="clipDate">Datum</label>
+                            <input type="date" id="clipDate" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="clipViews">Aufrufe</label>
+                            <input type="number" id="clipViews" placeholder="0">
+                        </div>
+                    </div>
+                    <input type="hidden" id="clipId" value="">
+                    <input type="hidden" id="clipThumbnail" value="">
+                    <input type="hidden" id="clipTimestamp" value="">
+                </form>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" onclick="saveClip()">Speichern</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('clipModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="modal">
+        <div class="bug-modal-content" style="width: 400px;">
+            <div class="bug-modal-header">
+                <h3><i class="fa-solid fa-trash" style="color: var(--red);"></i> Clip löschen</h3>
+                <button class="modal-close" onclick="closeModal('deleteConfirmModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <p>Bist du sicher, dass du diesen Clip <strong id="deleteClipName"></strong> löschen möchtest?</p>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" style="background: var(--red);" onclick="confirmDeleteClip()">Ja, löschen</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('deleteConfirmModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="playerModal" class="modal">
+        <div class="modal-player-content">
+            <button class="close-player" onclick="closeModal('playerModal')">✕</button>
+            <div class="video-container">
+                <iframe id="clipPlayerIframe" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div id="bugReportModal" class="modal">
+        <div class="bug-modal-content">
+            <div class="bug-modal-header">
+                <h3><i class="fas fa-bug"></i> Bug melden</h3>
+                <button class="modal-close" onclick="closeModal('bugReportModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <p>Bug Reports werden an rewins weitergeleitet und zeitnah gefixed.</p>
+                <form id="bugReportForm">
+                    <div class="form-group">
+                        <label for="bugSubject">Betreff</label>
+                        <input type="text" id="bugSubject" placeholder="Kurze Zusammenfassung" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bugDescription">Beschreibung</label>
+                        <textarea id="bugDescription" rows="5" placeholder="Was ist passiert? Wie können wir es fixen?" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" onclick="submitBugReport()">Absenden</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('bugReportModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="fa-solid fa-check" style="color: #3acf6b;"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="/static/design/clips/js/clips.js"></script>
+</body>
+</html>

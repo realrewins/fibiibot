@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · Anmeldung</title>
+    <style>
+        :root {
+            --bg-app: #0b0b12;
+            --card-bg: rgba(25, 25, 35, 0.7);
+            --border-accent: rgba(138, 79, 255, 0.3);
+            --text-primary: #f0f0f0;
+            --text-secondary: #a8a8c0;
+            --accent: #8a4fff;
+            --accent-glow: rgba(138, 79, 255, 0.4);
+            --red: #ff5f5f;
+            --radius-lg: 24px;
+            --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e0a3d, #06040a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .callback-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2.5rem;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+        }
+
+        .logo-fibii {
+            background: linear-gradient(135deg, #fff, #c5c5e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-bot {
+            background: linear-gradient(135deg, var(--accent), #b48aff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-left: 0.2rem;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, #c0c0d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 1.5rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            background: rgba(255, 95, 95, 0.1);
+            border: 1px solid var(--red);
+            border-radius: 40px;
+            padding: 1rem;
+            color: #ff8a8a;
+            font-size: 0.95rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .retry-btn {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 40px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1.5rem;
+            display: none;
+            width: 100%;
+        }
+
+        .retry-btn:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(138, 79, 255, 0.3);
+        }
+
+        @media (max-width: 480px) {
+            .callback-container {
+                padding: 2rem 1.5rem;
+            }
+            .logo {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="callback-container">
+        <div class="logo">
+            <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
+        </div>
+        <h2>Anmeldung wird abgeschlossen</h2>
+        <p>Bitte warte einen Moment, während du weitergeleitet wirst.</p>
+        
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        <div class="status-text" id="statusText">Sitzung wird eingerichtet</div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <button id="retryBtn" class="retry-btn">Zurück zum Login</button>
+    </div>
+
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const statusText = document.getElementById('statusText');
+            const errorMessage = document.getElementById('errorMessage');
+            const retryBtn = document.getElementById('retryBtn');
+            
+            if (code && state) {
+                fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ code, state })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    return response.json().then(err => { throw err; });
+                })
+                .then(data => {
+                    if (data.access) {
+                        window.location.href = data.redirect || '/';
+                    } else {
+                        loadingSpinner.style.display = 'none';
+                        statusText.style.display = 'none';
+                        errorMessage.textContent = 'Du bist nicht whitelisted.';
+                        errorMessage.style.display = 'block';
+                        retryBtn.style.display = 'inline-block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Login fehlgeschlagen:', error);
+                    loadingSpinner.style.display = 'none';
+                    statusText.style.display = 'none';
+                    
+                    if (error.access === false) {
+                        errorMessage.textContent = 'Du bist nicht whitelisted.';
+                    } else if (error.error) {
+                        errorMessage.textContent = 'Fehler: ' + error.error;
+                    } else {
+                        errorMessage.textContent = 'Login fehlgeschlagen. Bitte versuche es erneut.';
+                    }
+                    
+                    errorMessage.style.display = 'block';
+                    retryBtn.style.display = 'inline-block';
+                });
+            } else {
+                loadingSpinner.style.display = 'none';
+                statusText.style.display = 'none';
+                errorMessage.textContent = 'Ungültige Login-Daten erhalten.';
+                errorMessage.style.display = 'block';
+                retryBtn.style.display = 'inline-block';
+            }
+            
+            retryBtn.addEventListener('click', function() {
+                window.location.href = '/login';
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · Giveaway</title>
+    <link rel="stylesheet" href="/static/design/giveaway/css/giveaway.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo" onclick="window.location.href='/'">
+                <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button onclick="window.location.href='/'" class="nav-item {% if current_page == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <div class="nav-divider"></div>
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/guide'" class="nav-item {% if current_page == 'guide' %}active{% endif %}">
+                    <i class="fas fa-book-open"></i>
+                    <span>Modguide</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/clips'" class="nav-item {% if current_page == 'clips' %}active{% endif %}">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Clips</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/suggestions'" class="nav-item {% if current_page == 'suggestions' %}active{% endif %}">
+                    <i class="fas fa-user-slash"></i>
+                    <span>Blacklist</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/giveaway'" class="nav-item {% if current_page == 'giveaway' %}active{% endif %}">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>Giveaway</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster'] %}
+                <button onclick="window.location.href='/bugs'" class="nav-item {% if current_page == 'bugs' %}active{% endif %}" id="navBugReports">
+                    <i class="fas fa-bug"></i>
+                    <span>Bug Reports</span>
+                    <span class="sidebar-bug-badge" id="sidebarBugBadge"></span>
+                </button>
+                {% else %}
+                <div style="display: none;" id="navBugReports"></div>
+                <div style="display: none;" id="sidebarBugBadge"></div>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/bot'" class="nav-item {% if current_page == 'bot' %}active{% endif %}">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>Bot</span>
+                </button>
+                {% endif %}
+                <button onclick="window.location.href='/vod'" class="nav-item {% if current_page == 'vod' %}active{% endif %}">
+                    <i class="fa-solid fa-video"></i>
+                    <span>VOD</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="window.location.href='/settings'" class="nav-item {% if current_page == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </button>
+                <button onclick="logout()" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h1>Giveaway Codes</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="dev-notice"><i class="fa-solid fa-code"></i> Page in der Entwicklung</div>
+                    <button class="report-btn" id="bugReportBtn">
+                        <i class="fas fa-bug"></i>
+                        <span>Report Bug</span>
+                    </button>
+                    <div class="notification-dropdown-container">
+                        <button class="icon-button" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span id="notificationBadge" class="notification-badge"></span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="dropdown-header">
+                                <i class="fas fa-bell"></i>
+                                <span>Benachrichtigungen</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-container">
+                        <button class="profile-button" id="profileBtn">
+                            <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <img id="dropdownAvatar" src="" alt="">
+                                <div>
+                                    <div id="dropdownName"></div>
+                                    <div id="dropdownRole" class="role-tag"></div>
+                                </div>
+                            </div>
+                            <a href="#" onclick="window.location.href='/settings'; return false;"><i class="fas fa-cog"></i> User-Settings</a>
+                            <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="giveaway-top-row">
+                <div id="leakProtectionBanner" class="leak-banner active">
+                    <span><i class="fa-solid fa-shield"></i> Leakschutz aktiv!</span>
+                    <button class="btn-toggle-leak" onclick="toggleLeakProtection()"><i class="fa-solid fa-eye"></i> Anzeigen</button>
+                </div>
+            </div>
+
+            <div class="giveaway-second-row">
+                <div class="code-stat-box">
+                    <span><i class="fa-solid fa-gift"></i> Offene Codes:</span>
+                    <span id="openCodeCount" class="code-stat-number">0</span>
+                </div>
+
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="winnerSearch" class="winner-search" placeholder="Suche nach Gewinner...">
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="custom-dropdown" id="typeFilterDropdown">
+                        <div class="dropdown-selected" id="selectedTypeText">
+                            <span>Alle Typen</span>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="all">Alle Typen</div>
+                            <div class="dropdown-option" data-value="Dominos 20€">Dominos 20€</div>
+                            <div class="dropdown-option" data-value="Dominos 50€">Dominos 50€</div>
+                            <div class="dropdown-option" data-value="JBL Gutschein">JBL Gutschein</div>
+                        </div>
+                    </div>
+                    <div class="custom-dropdown" id="statusFilterDropdown">
+                        <div class="dropdown-selected" id="selectedStatusText">
+                            <span>Alle Status</span>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="all">Alle Status</div>
+                            <div class="dropdown-option" data-value="open">Offen</div>
+                            <div class="dropdown-option" data-value="used">Vergeben</div>
+                        </div>
+                    </div>
+                    <button onclick="openModal('addCodeModal')" class="btn-add-code"><i class="fa-solid fa-plus"></i> Neuer Code</button>
+                </div>
+            </div>
+
+            <table class="twitch-table">
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Art</th>
+                        <th>Code & PIN</th>
+                        <th style="width: 160px;">Gewinner</th>
+                        <th style="width: 100px;">Status</th>
+                        <th style="text-align: right;">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="giveawayListBody"></tbody>
+            </table>
+        </main>
+    </div>
+
+    <div id="addCodeModal" class="modal">
+        <div class="bug-modal-content" onclick="event.stopPropagation()">
+            <div class="bug-modal-header">
+                <h3><i class="fa-solid fa-gift"></i> Neuen Code hinzufügen</h3>
+                <button class="modal-close" onclick="closeModal('addCodeModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <form id="addCodeForm">
+                    <div class="form-group">
+                        <label for="newCodeType">Art / Betrag</label>
+                        <div class="custom-dropdown modal-dropdown" id="modalTypeDropdown">
+                            <div class="dropdown-selected" id="modalSelectedType">
+                                <span>Dominos 20€</span>
+                            </div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="Dominos 20€">Dominos 20€</div>
+                                <div class="dropdown-option" data-value="Dominos 50€">Dominos 50€</div>
+                                <div class="dropdown-option" data-value="JBL Gutschein">JBL Gutschein</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="newCodeType" value="Dominos 20€">
+                    </div>
+                    <div class="form-group">
+                        <label for="newCodeValue">Code</label>
+                        <input type="text" id="newCodeValue" placeholder="z.B. 60643..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newCodePin">PIN</label>
+                        <input type="text" id="newCodePin" placeholder="z.B. 035865" required>
+                    </div>
+                </form>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" onclick="addGiveawayCode()">Hinzufügen</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('addCodeModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmDeleteModal" class="modal">
+        <div class="bug-modal-content" onclick="event.stopPropagation()">
+            <div class="bug-modal-header">
+                <h3><i class="fa-solid fa-trash"></i> Löschen bestätigen</h3>
+                <button class="modal-close" onclick="closeModal('confirmDeleteModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <p id="deleteConfirmMessage">Möchtest du diesen Eintrag wirklich löschen?</p>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" id="confirmDeleteBtn">Löschen</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('confirmDeleteModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bugReportModal" class="modal">
+        <div class="bug-modal-content" onclick="event.stopPropagation()">
+            <div class="bug-modal-header">
+                <h3><i class="fas fa-bug"></i> Bug melden</h3>
+                <button class="modal-close" onclick="closeModal('bugReportModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <p>Bug Reports werden an rewins weitergeleitet und zeitnah gefixed.</p>
+                <form id="bugReportForm">
+                    <div class="form-group">
+                        <label for="bugSubject">Betreff</label>
+                        <input type="text" id="bugSubject" placeholder="Kurze Zusammenfassung" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bugDescription">Beschreibung</label>
+                        <textarea id="bugDescription" rows="5" placeholder="Was ist passiert? Wie können wir es fixen?" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" onclick="submitBugReport()">Absenden</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('bugReportModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="fa-solid fa-check" style="color: #3acf6b;"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="/static/design/giveaway/js/giveaway.js"></script>
+</body>
+</html>

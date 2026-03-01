@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · Blacklist</title>
+    <link rel="stylesheet" href="/static/design/suggestions/css/suggestions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo" onclick="window.location.href='/'">
+                <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button onclick="window.location.href='/'" class="nav-item {% if current_page == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <div class="nav-divider"></div>
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/guide'" class="nav-item {% if current_page == 'guide' %}active{% endif %}">
+                    <i class="fas fa-book-open"></i>
+                    <span>Modguide</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/clips'" class="nav-item {% if current_page == 'clips' %}active{% endif %}">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Clips</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/suggestions'" class="nav-item {% if current_page == 'suggestions' %}active{% endif %}">
+                    <i class="fas fa-user-slash"></i>
+                    <span>Blacklist</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/giveaway'" class="nav-item {% if current_page == 'giveaway' %}active{% endif %}">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>Giveaway</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster'] %}
+                <button onclick="window.location.href='/bugs'" class="nav-item {% if current_page == 'bugs' %}active{% endif %}" id="navBugReports">
+                    <i class="fas fa-bug"></i>
+                    <span>Bug Reports</span>
+                    <span class="sidebar-bug-badge" id="sidebarBugBadge"></span>
+                </button>
+                {% else %}
+                <div style="display: none;" id="navBugReports"></div>
+                <div style="display: none;" id="sidebarBugBadge"></div>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/bot'" class="nav-item {% if current_page == 'bot' %}active{% endif %}">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>Bot</span>
+                </button>
+                {% endif %}
+                <button onclick="window.location.href='/vod'" class="nav-item {% if current_page == 'vod' %}active{% endif %}">
+                    <i class="fa-solid fa-video"></i>
+                    <span>VOD</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="window.location.href='/settings'" class="nav-item {% if current_page == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </button>
+                <button onclick="logout()" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h1>Blacklist / Empfehlungen</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="dev-notice"><i class="fa-solid fa-code"></i> Page in der Entwicklung</div>
+                    <button class="report-btn" id="bugReportBtn">
+                        <i class="fas fa-bug"></i>
+                        <span>Report Bug</span>
+                    </button>
+                    <div class="notification-dropdown-container">
+                        <button class="icon-button" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span id="notificationBadge" class="notification-badge"></span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="dropdown-header">
+                                <i class="fas fa-bell"></i>
+                                <span>Benachrichtigungen</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-container">
+                        <button class="profile-button" id="profileBtn">
+                            <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <img id="dropdownAvatar" src="" alt="">
+                                <div>
+                                    <div id="dropdownName"></div>
+                                    <div id="dropdownRole" class="role-tag"></div>
+                                </div>
+                            </div>
+                            <a href="#" onclick="window.location.href='/settings'; return false;"><i class="fas fa-cog"></i> User-Settings</a>
+                            <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="suggestions-second-row">
+                <div class="custom-dropdown" id="statusFilterDropdown">
+                    <div class="dropdown-selected" id="selectedStatusText">
+                        <span>Alle Status</span>
+                    </div>
+                    <div class="dropdown-options">
+                        <div class="dropdown-option" data-value="all">Alle Status</div>
+                        <div class="dropdown-option" data-value="blacklist">Blacklisted</div>
+                        <div class="dropdown-option" data-value="ungern">Ungern</div>
+                        <div class="dropdown-option" data-value="empfehlung">Empfehlung</div>
+                    </div>
+                </div>
+
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="nameSearch" class="name-search" placeholder="Suche nach Name...">
+                </div>
+
+                <button onclick="openNewEntryModal()" class="btn-add-entry"><i class="fa-solid fa-plus"></i> Neuer Eintrag</button>
+            </div>
+
+            <table class="twitch-table">
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Name</th>
+                        <th style="width: 120px;">Status</th>
+                        <th style="width: 120px;">Follower seit</th>
+                        <th style="width: 100px;">Watchtime</th>
+                        <th>Begründung</th>
+                        <th style="text-align: right; width: 100px;">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="listBody"></tbody>
+            </table>
+        </main>
+    </div>
+
+    <div id="entryModal" class="modal">
+        <div class="bug-modal-content" onclick="event.stopPropagation()">
+            <div class="bug-modal-header">
+                <h3><i class="fas fa-user-slash"></i> <span id="entryModalTitle">Neuer Eintrag</span></h3>
+                <button class="modal-close" onclick="closeModal('entryModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <form id="entryForm">
+                    <div class="form-group">
+                        <label for="entryName">Twitchname</label>
+                        <input type="text" id="entryName" placeholder="z.B. xQirby" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryStatus">Status</label>
+                        <div class="custom-dropdown modal-dropdown" id="modalStatusDropdown">
+                            <div class="dropdown-selected" id="modalSelectedStatus">
+                                <span>Blacklisted</span>
+                            </div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="blacklist">Blacklisted</div>
+                                <div class="dropdown-option" data-value="ungern">Ungern</div>
+                                <div class="dropdown-option" data-value="empfehlung">Empfehlung</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="entryStatus" value="blacklist">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="entryFollower">Follower seit</label>
+                            <input type="text" id="entryFollower" placeholder="Wird automatisch geladen...">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="entryWatchtime">Watchtime</label>
+                            <input type="text" id="entryWatchtime" placeholder="z.B. 50h">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryReason">Begründung</label>
+                        <textarea id="entryReason" rows="3" placeholder="Warum diese Einstufung?" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" onclick="saveEntry()">Speichern</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('entryModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="modal">
+        <div class="bug-modal-content" style="width: 400px;" onclick="event.stopPropagation()">
+            <div class="bug-modal-header">
+                <h3><i class="fa-solid fa-trash" style="color: var(--red);"></i> Eintrag löschen</h3>
+                <button class="modal-close" onclick="closeModal('deleteConfirmModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <p>Bist du sicher, dass du diesen Eintrag <strong id="deleteEntryName"></strong> löschen möchtest?</p>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" style="background: var(--red);" onclick="confirmDelete()">Ja, löschen</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('deleteConfirmModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bugReportModal" class="modal">
+        <div class="bug-modal-content" onclick="event.stopPropagation()">
+            <div class="bug-modal-header">
+                <h3><i class="fas fa-bug"></i> Bug melden</h3>
+                <button class="modal-close" onclick="closeModal('bugReportModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <p>Bug Reports werden an rewins weitergeleitet und zeitnah gefixed.</p>
+                <form id="bugReportForm">
+                    <div class="form-group">
+                        <label for="bugSubject">Betreff</label>
+                        <input type="text" id="bugSubject" placeholder="Kurze Zusammenfassung" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bugDescription">Beschreibung</label>
+                        <textarea id="bugDescription" rows="5" placeholder="Was ist passiert? Wie können wir es fixen?" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" onclick="submitBugReport()">Absenden</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('bugReportModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="fa-solid fa-check" style="color: #3acf6b;"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="/static/design/suggestions/js/suggestions.js"></script>
+</body>
+</html>

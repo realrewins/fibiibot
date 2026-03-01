@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · Login</title>
+    <style>
+        :root {
+            --bg-app: #0b0b12;
+            --card-bg: rgba(25, 25, 35, 0.7);
+            --border-accent: rgba(138, 79, 255, 0.3);
+            --text-primary: #f0f0f0;
+            --text-secondary: #a8a8c0;
+            --accent: #8a4fff;
+            --accent-glow: rgba(138, 79, 255, 0.4);
+            --radius-lg: 24px;
+            --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+            --transition: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e0a3d, #06040a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2.5rem;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .login-box.fade-out {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+        }
+
+        .logo-fibii {
+            background: linear-gradient(135deg, #fff, #c5c5e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-bot {
+            background: linear-gradient(135deg, var(--accent), #b48aff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-left: 0.2rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, #c0c0d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .btn-twitch {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(138, 79, 255, 0.3);
+        }
+
+        .btn-twitch:hover {
+            opacity: 0.85;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(138, 79, 255, 0.5);
+        }
+
+        .btn-twitch i {
+            font-size: 1.2rem;
+        }
+
+        .login-loading {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .login-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .login-loading p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 480px) {
+            .login-box {
+                padding: 2rem 1.5rem;
+            }
+            .logo {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loginBox" class="login-box">
+        <div class="logo">
+            <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
+        </div>
+        <h2>Login mit Twitch</h2>
+        <p>Bitte melde dich mit deinem Twitch-Account an,<br>um Zugriff auf das Dashboard zu erhalten.</p>
+        <button id="auth-btn" class="btn-twitch">
+            <i class="fab fa-twitch"></i> Mit Twitch fortfahren
+        </button>
+        <div id="loginLoading" class="login-loading">
+            <div class="login-spinner"></div>
+            <p>Anmeldung wird verarbeitet ...</p>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.opacity = '1';
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const nextParam = urlParams.get('next') || '{{ next }}' || '/';
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            
+            if (code && state) {
+                const loginBox = document.getElementById('loginBox');
+                const loading = document.getElementById('loginLoading');
+                const authBtn = document.getElementById('auth-btn');
+                
+                loginBox.classList.add('fade-out');
+                authBtn.style.display = 'none';
+                loading.style.display = 'block';
+                
+                fetch('/auth/immediate?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state), {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Immediate login failed');
+                })
+                .then(data => {
+                    if (data.access) {
+                        window.location.href = data.redirect || '/';
+                    } else {
+                        alert('Zugriff verweigert. Nicht in der Whitelist.');
+                        loginBox.classList.remove('fade-out');
+                        authBtn.style.display = 'block';
+                        loading.style.display = 'none';
+                        window.history.replaceState({}, document.title, '/login');
+                    }
+                })
+                .catch(error => {
+                    console.error('Quick login failed:', error);
+                    window.history.replaceState({}, document.title, '/login');
+                    loginBox.classList.remove('fade-out');
+                    authBtn.style.display = 'block';
+                    loading.style.display = 'none';
+                    alert('Schneller Login fehlgeschlagen. Bitte versuche es erneut.');
+                });
+            } else {
+                fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ check: true })
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.access) {
+                            window.location.href = nextParam;
+                        }
+                    })
+                    .catch(() => { });
+            }
+            
+            document.getElementById('auth-btn').addEventListener('click', function() {
+                const loginBox = document.getElementById('loginBox');
+                const loading = document.getElementById('loginLoading');
+                const authBtn = document.getElementById('auth-btn');
+                
+                loginBox.classList.add('fade-out');
+                authBtn.style.display = 'none';
+                loading.style.display = 'block';
+                
+                fetch('/api/auth/url?next=' + encodeURIComponent(nextParam))
+                .then(response => response.json())
+                .then(data => {
+                    window.location.href = data.url;
+                })
+                .catch(e => {
+                    console.error("Auth URL Fehler", e);
+                    alert("Fehler beim Starten des Logins.");
+                    loginBox.classList.remove('fade-out');
+                    authBtn.style.display = 'block';
+                    loading.style.display = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

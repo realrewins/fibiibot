@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · Modguide</title>
+    <link rel="stylesheet" href="/static/design/guide/css/guide.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo" onclick="window.location.href='/'">
+                <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button onclick="window.location.href='/'" class="nav-item {% if current_page == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <div class="nav-divider"></div>
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/guide'" class="nav-item {% if current_page == 'guide' %}active{% endif %}">
+                    <i class="fas fa-book-open"></i>
+                    <span>Modguide</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/clips'" class="nav-item {% if current_page == 'clips' %}active{% endif %}">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Clips</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/suggestions'" class="nav-item {% if current_page == 'suggestions' %}active{% endif %}">
+                    <i class="fas fa-user-slash"></i>
+                    <span>Blacklist</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/giveaway'" class="nav-item {% if current_page == 'giveaway' %}active{% endif %}">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>Giveaway</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster'] %}
+                <button onclick="window.location.href='/bugs'" class="nav-item {% if current_page == 'bugs' %}active{% endif %}" id="navBugReports">
+                    <i class="fas fa-bug"></i>
+                    <span>Bug Reports</span>
+                    <span class="sidebar-bug-badge" id="sidebarBugBadge"></span>
+                </button>
+                {% else %}
+                <div style="display: none;" id="navBugReports"></div>
+                <div style="display: none;" id="sidebarBugBadge"></div>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/bot'" class="nav-item {% if current_page == 'bot' %}active{% endif %}">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>Bot</span>
+                </button>
+                {% endif %}
+                <button onclick="window.location.href='/vod'" class="nav-item {% if current_page == 'vod' %}active{% endif %}">
+                    <i class="fa-solid fa-video"></i>
+                    <span>VOD</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="window.location.href='/settings'" class="nav-item {% if current_page == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </button>
+                <button onclick="logout()" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h1>Modguide</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="dev-notice"><i class="fa-solid fa-code"></i> Page in der Entwicklung</div>
+                    <button class="report-btn" id="bugReportBtn">
+                        <i class="fas fa-bug"></i>
+                        <span>Report Bug</span>
+                    </button>
+                    <div class="notification-dropdown-container">
+                        <button class="icon-button" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span id="notificationBadge" class="notification-badge"></span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="dropdown-header">
+                                <i class="fas fa-bell"></i>
+                                <span>Benachrichtigungen</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-container">
+                        <button class="profile-button" id="profileBtn">
+                            <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <img id="dropdownAvatar" src="" alt="">
+                                <div>
+                                    <div id="dropdownName"></div>
+                                    <div id="dropdownRole" class="role-tag"></div>
+                                </div>
+                            </div>
+                            <a href="#" onclick="window.location.href='/settings'; return false;"><i class="fas fa-cog"></i> User-Settings</a>
+                            <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-container">
+                <section class="guide-section">
+                    <h2><i class="fa-solid fa-clock"></i> Timeout-Reihenfolge (TR)</h2>
+                    <p class="section-desc">Folgende Timeoutlängen solltet ihr verwenden. Nach erster Verwendung wird bei weiteren Verstößen der nächsthöhere Timeout verwendet.</p>
+                    <div class="timeout-steps">
+                        <span class="step">Delete / 1s</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="step">2 Minuten</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="step">10 Minuten</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="step">1 Stunde</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="step">1 Tag</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="step">1 Woche</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="step">2 Wochen</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span class="step">Ban</span>
+                    </div>
+                </section>
+
+                <section class="guide-section">
+                    <h2><i class="fa-solid fa-gavel"></i> Moderationsmaßnahmen</h2>
+                    <div class="mod-cards">
+                        <div class="mod-card severity-low">
+                            <div class="card-header">
+                                <i class="fa-solid fa-message"></i>
+                                <h3>Nachrichten löschen</h3>
+                            </div>
+                            <ul>
+                                <li><strong>Unangemessene Spitznamen</strong> – wie „Mäuschen", „Baby", „Schnecke" → 1. Mal löschen, danach TR</li>
+                                <li><strong>Nach Streamern fragen</strong> – „Wann geht Monte live?" → 1. Mal löschen, danach TR</li>
+                                <li><strong>Unangebrachte Aufforderungen</strong> – „lächel mal süß" → 1. Mal löschen, danach TR</li>
+                            </ul>
+                        </div>
+                        <div class="mod-card severity-medium">
+                            <div class="card-header">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                                <h3>2 Minuten Timeouts</h3>
+                            </div>
+                            <ul>
+                                <li><strong>Spam im Chat</strong> – 4× dieselbe Nachricht oder 3× sehr schnell hintereinander → 2 Min, danach TR</li>
+                            </ul>
+                        </div>
+                        <div class="mod-card severity-medium">
+                            <div class="card-header">
+                                <i class="fa-solid fa-hourglass-end"></i>
+                                <h3>10 Minuten Timeouts</h3>
+                            </div>
+                            <ul>
+                                <li><strong>Leichte Beleidigungen</strong> – „Opfer", „bist du dumm" → 10 Min</li>
+                                <li><strong>Negative/übergriffige Aussagen</strong> – „Dir geht's zu gut", „selber schuld" → 10 Min</li>
+                                <li><strong>Streit zwischen Usern</strong> – nach Aufforderung keine Einsicht → 10 Min</li>
+                                <li><strong>Fragen nach OnlyFans</strong> → 10 Min</li>
+                            </ul>
+                        </div>
+                        <div class="mod-card severity-high">
+                            <div class="card-header">
+                                <i class="fa-solid fa-ban"></i>
+                                <h3>Größere Timeouts / Perma Banns</h3>
+                            </div>
+                            <ul>
+                                <li><strong>Spoiler</strong> – 1 Stunde</li>
+                                <li><strong>Weirde Aussagen</strong> – „zeig mal Füße" → 1 Tag, danach TR</li>
+                                <li><strong>Schwere Beleidigungen</strong> – gegen Fibii/Kollegen → <span class="highlight">Permaban</span></li>
+                                <li><strong>Sexuelle Belästigung</strong> – „Zeig Arsch" → <span class="highlight">Permaban</span></li>
+                                <li><strong>Eigenwerbung</strong> → <span class="highlight">Permaban</span></li>
+                                <li><strong>Rassismus / Hassrede / Sexismus</strong> – „Geh in die Küche" → <span class="highlight">Sofortiger Permaban ohne Entbannung</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="guide-section">
+                    <h2><i class="fa-solid fa-info-circle"></i> Allgemeine Infos</h2>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <i class="fa-solid fa-robot"></i>
+                            <h3>Chatbot</h3>
+                            <p>Wir benutzen bei Fibii <strong>Fossabot</strong> für Chatcommands, Game/Title und Automoderation.</p>
+                            <a href="https://fossabot.com/c/fibii/dashboard" target="_blank" class="btn btn-small">🔗 Zum Fossabot Dashboard</a>
+                            <p class="note">Die Automoderation wird hauptsächlich von @HARASS_ / @Fabi391 übernommen.</p>
+                        </div>
+                        <div class="info-card">
+                            <i class="fa-solid fa-terminal"></i>
+                            <h3>Wichtige Commands</h3>
+                            <div class="commands">
+                                <div><code>!setgame (Name)</code> Game ändern</div>
+                                <div><code>!settitle (Text)</code> Titel ändern</div>
+                                <div><code>/poll</code> Abstimmung</div>
+                                <div><code>/prediction</code> Wette</div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <h3>Crossbans & Kommentare</h3>
+                            <p>Wir führen <strong>keine Crossbans</strong> durch, sofern sie Fibii nicht betreffen.</p>
+                            <p>Bei Bans wegen Twitch-Einschränkungen oder Permabans: <strong>Bitte immer einen Mod-Kommentar in der Usercard hinterlassen!</strong> (Am besten mit Screenshot-Link via Imgur/ShareX).</p>
+                        </div>
+                        <div class="info-card">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <h3>Placements</h3>
+                            <p>Bei Commands für Placements bitte am Ende der Zeile immer <span class="badge">„Werbung“</span> hinzufügen.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="guide-section chatty-section">
+                    <h2><i class="fa-solid fa-comment-dots"></i> Chatty & Tools</h2>
+                    <div class="chatty-content">
+                        <div class="chatty-download">
+                            <i class="fa-solid fa-download"></i>
+                            <div>
+                                <h3>Chatty Konfiguration herunterladen</h3>
+                                <p>Lade die vorgefertigten Einstellungen herunter und importiere sie in Chatty.</p>
+                                <a href="/download/session__settings" download="session__settings" class="btn btn-chatty"><i class="fa-solid fa-file"></i> session__settings herunterladen</a>
+                            </div>
+                        </div>
+
+                        <div class="chatty-download">
+                            <i class="fa-solid fa-camera"></i>
+                            <div>
+                                <h3>ShareX Screenshot Tool</h3>
+                                <p>Für einfache Screenshots und schnelles Hochladen (z.B. für Mod-Kommentare).</p>
+                                <a href="https://getsharex.com/downloads" target="_blank" class="btn btn-chatty"><i class="fa-solid fa-download"></i> ShareX herunterladen</a>
+                            </div>
+                        </div>
+
+                        <div class="chatty-steps">
+                            <h3>So fügst du die Chatty Settings ein:</h3>
+                            <ol>
+                                <li>Öffne über das Hauptmenü deine <strong>Einstellungen</strong>.</li>
+                                <li>Direkt im ersten Tab "Haupt" findest du unter "Einstellungsverwaltung" den Punkt <strong>Sicherheitskopien</strong>.</li>
+                                <li>Klicke auf <strong>"Open Backup Directory"</strong> – der Ordner öffnet sich.</li>
+                                <li>Füge die heruntergeladene Datei <code>session__settings</code> in diesen Ordner ein (ersetze ggf. die vorhandene).</li>
+                                <li>In Chatty wählst du unter "Einstellungsverwaltung" die neue Datei aus und klickst auf <strong>"Load Selected Backup"</strong>.</li>
+                                <li><strong>Chatty neustarten!</strong> – fertig.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="bugReportModal" class="modal">
+        <div class="bug-modal-content" onclick="event.stopPropagation()">
+            <div class="bug-modal-header">
+                <h3><i class="fas fa-bug"></i> Bug melden</h3>
+                <button class="modal-close" onclick="closeModal('bugReportModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bug-modal-body">
+                <p>Bug Reports werden an rewins weitergeleitet und zeitnah gefixed.</p>
+                <form id="bugReportForm">
+                    <div class="form-group">
+                        <label for="bugSubject">Betreff</label>
+                        <input type="text" id="bugSubject" placeholder="Kurze Zusammenfassung" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bugDescription">Beschreibung</label>
+                        <textarea id="bugDescription" rows="5" placeholder="Was ist passiert? Wie können wir es fixen?" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="bug-modal-footer">
+                <button class="btn" onclick="submitBugReport()">Absenden</button>
+                <button class="btn" style="background: #2f2f38;" onclick="closeModal('bugReportModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="fa-solid fa-check" style="color: #3acf6b;"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="/static/design/guide/js/guide.js"></script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · VOD</title>
+    <link rel="stylesheet" href="/static/design/vod/css/vod.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo" onclick="window.location.href='/'">
+                <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button onclick="window.location.href='/'" class="nav-item {% if current_page == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </button>
+                <div class="nav-divider"></div>
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/guide'" class="nav-item {% if current_page == 'guide' %}active{% endif %}">
+                    <i class="fas fa-book-open"></i>
+                    <span>Modguide</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/clips'" class="nav-item {% if current_page == 'clips' %}active{% endif %}">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Clips</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/suggestions'" class="nav-item {% if current_page == 'suggestions' %}active{% endif %}">
+                    <i class="fas fa-user-slash"></i>
+                    <span>Blacklist</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/giveaway'" class="nav-item {% if current_page == 'giveaway' %}active{% endif %}">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>Giveaway</span>
+                </button>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster'] %}
+                <button onclick="window.location.href='/bugs'" class="nav-item {% if current_page == 'bugs' %}active{% endif %}" id="navBugReports">
+                    <i class="fas fa-bug"></i>
+                    <span>Bug Reports</span>
+                    <span class="sidebar-bug-badge" id="sidebarBugBadge"></span>
+                </button>
+                {% else %}
+                <div style="display: none;" id="navBugReports"></div>
+                <div style="display: none;" id="sidebarBugBadge"></div>
+                {% endif %}
+                {% if user.role in ['admin','dev','broadcaster','editor'] %}
+                <button onclick="window.location.href='/bot'" class="nav-item {% if current_page == 'bot' %}active{% endif %}">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>Bot</span>
+                </button>
+                {% endif %}
+                <button onclick="window.location.href='/vod'" class="nav-item {% if current_page == 'vod' %}active{% endif %}">
+                    <i class="fa-solid fa-video"></i>
+                    <span>VOD</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="window.location.href='/settings'" class="nav-item {% if current_page == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </button>
+                <button onclick="logout()" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h1>VOD</h1>
+                    <span id="live-status" class="live-tag"><span class="live-dot offline"></span> Prüfe Verbindung...</span>
+                </div>
+                <div class="top-bar-right">
+                    <div class="dev-notice"><i class="fa-solid fa-code"></i> Live-Stream & Aufnahmen</div>
+                    <button class="report-btn" id="bugReportBtn">
+                        <i class="fas fa-bug"></i>
+                        <span>Report Bug</span>
+                    </button>
+                    <div class="notification-dropdown-container">
+                        <button class="icon-button" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span id="notificationBadge" class="notification-badge"></span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="dropdown-header">
+                                <i class="fas fa-bell"></i>
+                                <span>Benachrichtigungen</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-container">
+                        <button class="profile-button" id="profileBtn">
+                            <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <img id="dropdownAvatar" src="" alt="">
+                                <div>
+                                    <div id="dropdownName"></div>
+                                    <div id="dropdownRole" class="role-tag"></div>
+                                </div>
+                            </div>
+                            <a href="#" onclick="window.location.href='/settings'; return false;"><i class="fas fa-cog"></i> User-Settings</a>
+                            <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="live-section" class="live-section">
+                <div class="stream-info" id="stream-info"></div>
+                <div class="video-wrapper" id="twitch-player-container"></div>
+                <div class="twitch-button-container" id="twitch-button-container" style="display: none;">
+                    <a href="https://twitch.tv/letshugotv" target="_blank" class="btn twitch-button">
+                        <i class="fab fa-twitch"></i> Auf Twitch öffnen
+                    </a>
+                </div>
+            </div>
+
+            <div class="vods-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-video"></i> Aufgezeichnete Streams</h2>
+                </div>
+                <div class="grid" id="vod-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VOD Player Modal -->
+    <div id="vodPlayerModal" class="modal vod-player-modal">
+        <div class="modal-content vod-modal-content">
+            <div class="modal-header">
+                <h3 id="vodModalTitle">Stream-Titel</h3>
+                <button class="modal-close" onclick="closeVodModal()"><i class="fas fa-times"></i></button>
+                <span class="game-badge" id="vodGameBadge">Unbekannt</span>
+            </div>
+            <div class="modal-body">
+                <div class="vod-player-container">
+                    <video id="vodVideo" controls></video>
+                </div>
+                <div class="vod-info">
+                    <div class="vod-meta">
+                        <span id="vodGame" class="game-badge"></span>
+                    </div>
+                    <!-- Clip-Bereich -->
+                    <div class="clip-creator">
+                        <div class="clip-input-row">
+                            <input type="text" id="clipStart" placeholder="Start (z.B. 1:23:45)" readonly>
+                            <button class="btn clip-set" onclick="setClipStart()"><i class="fas fa-play"></i> Set start</button>
+                        </div>
+                        <div class="clip-input-row">
+                            <input type="text" id="clipEnd" placeholder="Ende" readonly>
+                            <button class="btn clip-set" onclick="setClipEnd()"><i class="fas fa-stop"></i> Set end</button>
+                        </div>
+                        <div class="clip-input-row">
+                            <input type="text" id="clipName" placeholder="Clip-Name">
+                        </div>
+                        <div class="clip-actions">
+                            <button class="btn clip-create" onclick="createClip()"><i class="fa-solid fa-rocket"></i> Create</button>
+                            <div class="clip-loading-bar" id="clipLoadingBar" style="display: none;">
+                                <div class="loading-progress"></div>
+                            </div>
+                        </div>
+                        <div class="clip-result" id="clipResult" style="display: none;">
+                            <button class="btn clip-download" onclick="downloadClip()"><i class="fas fa-download"></i> Download</button>
+                            <button class="btn clip-generate" onclick="generateClipLink()"><i class="fas fa-link"></i> Generate link</button>
+                            <span id="clipLink" style="display: none;"></span>
+                        </div>
+                    </div>
+                    <!-- Outage-Dropdown -->
+                    <div class="vod-outages">
+                        <div class="outages-header" onclick="toggleOutages()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Ausfälle anzeigen</span>
+                            <i class="fas fa-chevron-down" id="outagesChevron"></i>
+                        </div>
+                        <div class="outages-list" id="outagesList" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bug Report Modal (unverändert) -->
+    <div id="bugReportModal" class="modal">...</div>
+    <div id="toast" class="toast">...</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="/static/design/vod/js/vod.js"></script>
+</body>
+</html>

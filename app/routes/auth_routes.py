@@ -41,29 +41,32 @@ def auth_immediate():
         return create_login_response(result['user'], csrf_token)
     except Exception as e:
         print(f"Exception in auth_immediate: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @auth_bp.route('/api/login', methods=['POST'])
 def api_login():
-    data = request.json
-    if data.get('check'):
-        if 'user' in session:
-            actual_role = get_user_role(session['user']['name'])
-            if session['user']['role'] != actual_role:
-                session['user']['role'] = actual_role
-            return jsonify({
-                'access': True,
-                'user': session['user'],
-                'csrf_token': generate_csrf_token()
-            })
-        return jsonify({'access': False}), 401
-    code = data.get('code')
-    state = data.get('state')
-    if not code or not state:
-        return jsonify({'error': 'Missing data'}), 400
-    if state != session.get('oauth_state'):
-        return jsonify({'error': 'Invalid state session'}), 403
     try:
+        data = request.json
+        if data.get('check'):
+            if 'user' in session:
+                actual_role = get_user_role(session['user']['name'])
+                if session['user']['role'] != actual_role:
+                    session['user']['role'] = actual_role
+                return jsonify({
+                    'access': True,
+                    'user': session['user'],
+                    'csrf_token': generate_csrf_token()
+                })
+            return jsonify({'access': False}), 401
+        code = data.get('code')
+        state = data.get('state')
+        if not code or not state:
+            return jsonify({'error': 'Missing data'}), 400
+        if state != session.get('oauth_state'):
+            return jsonify({'error': 'Invalid state session'}), 403
+        
         token_params = {
             'client_id': TWITCH_CLIENT_ID,
             'client_secret': TWITCH_CLIENT_SECRET,
@@ -84,6 +87,9 @@ def api_login():
         session.pop('oauth_state', None)
         return create_login_response(result['user'], csrf_token)
     except Exception as e:
+        print(f"Exception in api_login: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @auth_bp.route('/api/logout', methods=['POST'])

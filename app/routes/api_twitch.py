@@ -13,9 +13,11 @@ def twitch_follow_date():
     username = request.args.get('username')
     if not username:
         return jsonify({'error': 'Username fehlt'}), 400
+    
     username = username.lower().strip()
     if username.startswith('@'):
         username = username[1:]
+    
     date = get_twitch_follow_date(username)
     if date:
         return jsonify({'date': date})

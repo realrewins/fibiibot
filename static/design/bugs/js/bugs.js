@@ -101,15 +101,35 @@ async function initApp() {
 }
 
 async function loadBugReports() {
-    try {
-        const response = await fetch('/api/bugreports');
-        const data = await response.json();
-        allReports = data.reports || [];
-        filterAndRenderReports();
-    } catch (e) {
-        console.error('Fehler beim Laden der Bug-Reports', e);
-        document.getElementById('bugReportsBody').innerHTML = '<tr><td colspan="5" class="empty-message">Fehler beim Laden.</td></tr>';
+  try {
+    const response = await fetch('/api/bugreports');
+
+    // Wenn nicht OK: versuche eine verständliche Meldung zu bauen
+    if (!response.ok) {
+      if (response.status === 401) {
+        // nicht eingeloggt -> login
+        window.location.href = '/login';
+        return;
+      }
+
+      let errText = '';
+      try {
+        const errJson = await response.json();
+        errText = errJson.error || JSON.stringify(errJson);
+      } catch {
+        errText = await response.text();
+      }
+      throw new Error(`HTTP ${response.status}: ${errText}`);
     }
+
+    const data = await response.json();
+    allReports = data.reports || [];
+    filterAndRenderReports();
+  } catch (e) {
+    console.error('Fehler beim Laden der Bug-Reports', e);
+    document.getElementById('bugReportsBody').innerHTML =
+      '<tr><td colspan="5" class="empty-message">Fehler beim Laden.</td></tr>';
+  }
 }
 
 document.getElementById('reloadBugsBtn')?.addEventListener('click', function() {
@@ -151,43 +171,50 @@ function filterAndRenderReports() {
 }
 
 function renderReports(reports) {
-    const tbody = document.getElementById('bugReportsBody');
-    tbody.innerHTML = '';
-    if (reports.length === 0) {
-        const emptyRow = document.createElement('tr');
-        emptyRow.className = 'empty-state-row';
-        const emptyCell = document.createElement('td');
-        emptyCell.colSpan = 5;
-        emptyCell.className = 'empty-row-text';
-        emptyCell.textContent = 'Keine Bug-Reports gefunden.';
-        emptyRow.appendChild(emptyCell);
-        tbody.appendChild(emptyRow);
-        return;
-    }
-    reports.forEach(report => {
-        const date = new Date(report.timestamp).toLocaleString('de-DE', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
-        const shortSubject = report.subject.length > 40 ? report.subject.substring(0, 40) + '…' : report.subject;
-        const statusClass = report.status === 'closed' ? 'closed' : 'open';
-        const statusBadge = `<span class="status-badge ${statusClass}">${report.status === 'closed' ? 'Geschlossen' : 'Offen'}</span>`;
-        const closedClass = report.status === 'closed' ? 'is-closed' : '';
-        const displayName = report.display_name || report.username || '-';
-        const row = `<tr class="data-row ${closedClass}" data-id="${report.id}">
-            <td>${date}</td>
-            <td>${displayName}</td>
-            <td>${shortSubject}</td>
-            <td>${statusBadge}</td>
-            <td class="text-right">
-                <button class="btn" style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="showBugDetail('${encodeURIComponent(JSON.stringify(report))}')">Details</button>
-            </td>
-        </tr>`;
-        tbody.insertAdjacentHTML('beforeend', row);
+  const tbody = document.getElementById('bugReportsBody');
+  tbody.innerHTML = '';
+
+  if (!Array.isArray(reports) || reports.length === 0) {
+    const emptyRow = document.createElement('tr');
+    emptyRow.className = 'empty-state-row';
+    const emptyCell = document.createElement('td');
+    emptyCell.colSpan = 5;
+    emptyCell.className = 'empty-row-text';
+    emptyCell.textContent = 'Keine Bug-Reports gefunden.';
+    emptyRow.appendChild(emptyCell);
+    tbody.appendChild(emptyRow);
+    return;
+  }
+
+  reports.forEach(report => {
+    const ts = report?.timestamp ?? Date.now();
+    const date = new Date(ts).toLocaleString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
-    if (currentHighlightId) {
-        highlightReport(currentHighlightId);
-    }
+
+    const subject = (report?.subject ?? '').toString();
+    const shortSubject = subject.length > 40 ? subject.substring(0, 40) + '…' : (subject || '-');
+
+    const status = report?.status === 'closed' ? 'closed' : 'open';
+    const statusBadge = `<span class="status-badge ${status}">${status === 'closed' ? 'Geschlossen' : 'Offen'}</span>`;
+    const closedClass = status === 'closed' ? 'is-closed' : '';
+    const displayName = report?.display_name || report?.username || '-';
+    const id = report?.id ?? '';
+
+    const row = `<tr class="data-row ${closedClass}" data-id="${id}">
+        <td>${date}</td>
+        <td>${displayName}</td>
+        <td>${shortSubject}</td>
+        <td>${statusBadge}</td>
+        <td class="text-right">
+            <button class="btn" style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="showBugDetail('${encodeURIComponent(JSON.stringify(report))}')">Details</button>
+        </td>
+    </tr>`;
+    tbody.insertAdjacentHTML('beforeend', row);
+  });
+
+  if (currentHighlightId) highlightReport(currentHighlightId);
 }
 
 function highlightReport(id) {

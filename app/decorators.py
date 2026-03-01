@@ -1,14 +1,15 @@
 """
-Custom Decorators für Authentifizierung und Autorisierung
+Route Decorators
 """
 from functools import wraps
-from flask import session, redirect, url_for, jsonify, render_template
+from flask import session, redirect, url_for, jsonify
+from app.database import get_user_role
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -24,25 +25,45 @@ def admin_required(f):
     return decorated_function
 
 def role_required(allowed_roles):
+    """Decorator für rollenbasierte Zugriffskontrolle"""
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if 'user' not in session:
-                return redirect(url_for('login'))
-            if session['user']['role'] not in allowed_roles:
-                return render_template('403.html'), 403
+                return redirect(url_for('main.login'))
+            
+            user_role = session['user'].get('role')
+            if user_role not in allowed_roles:
+                return jsonify({'error': 'Insufficient permissions'}), 403
+            
             return f(*args, **kwargs)
         return decorated_function
     return decorator
 
 def api_role_required(allowed_roles):
+    """API Decorator für rollenbasierte Zugriffskontrolle"""
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if 'user' not in session:
                 return jsonify({'error': 'Not logged in'}), 401
-            if session['user']['role'] not in allowed_roles:
+            
+            user_role = session['user'].get('role')
+            if user_role not in allowed_roles:
                 return jsonify({'error': 'Insufficient permissions'}), 403
+            
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+def broadcaster_required(f):
+    """Nur für Broadcaster und Admin"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return jsonify({'error': 'Not logged in'}), 401
+        role = session['user']['role']
+        if role not in ['broadcaster', 'admin', 'dev']:
+            return jsonify({'error': 'Only broadcaster allowed'}), 403
+        return f(*args, **kwargs)
+    return decorated_function

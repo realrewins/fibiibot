@@ -354,28 +354,23 @@ async function confirmDelete() {
 }
 
 async function fetchFollowDate() {
-    const nameInput = document.getElementById('entryName');
-    let username = nameInput.value.trim();
-    if (!username) return;
-    if (username.startsWith('@')) username = username.substring(1);
-    const followerField = document.getElementById('entryFollower');
-    followerField.placeholder = 'Lade...';
+    const username = document.getElementById('entryName').value.trim();
+    if (!username) {
+        document.getElementById('entryFollower').value = '';
+        return;
+    }
+    
     try {
-        const response = await fetch(`/api/twitch/follow-date?username=${encodeURIComponent(username)}`, {
-            headers: { 'X-CSRF-Token': csrfToken }
-        });
-        if (response.status === 401) { window.location.href = '/login'; return; }
-        if (response.ok) {
-            const data = await response.json();
-            followerField.value = data.date || '-';
+        const response = await fetch(`/api/twitch/follow-date?username=${encodeURIComponent(username)}`);
+        const data = await response.json();
+        if (data.date) {
+            document.getElementById('entryFollower').value = data.date;
         } else {
-            followerField.value = '-';
+            document.getElementById('entryFollower').value = 'Nicht gefunden';
         }
     } catch (e) {
-        console.error("Fehler beim Abrufen des Follow-Datums", e);
-        followerField.value = '-';
-    } finally {
-        followerField.placeholder = '';
+        console.error('Fehler beim Abrufen des Follow-Datums:', e);
+        document.getElementById('entryFollower').value = 'Fehler';
     }
 }
 

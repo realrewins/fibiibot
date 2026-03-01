@@ -1,30 +1,28 @@
 """
-Authentifizierung & OAuth
+Authentication & Token Management
 """
 import secrets
-import requests
+import json
+import os
 import hmac
-from flask import session, jsonify, make_response, request, url_for
-from datetime import datetime
-from app.config import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, SESSION_COOKIE_SECURE, SESSION_COOKIE_DOMAIN, BASE_URL
-from app.database import get_users_cached, check_user_whitelisted, get_user_role, save_users
-from app.twitch_api import get_broadcaster_id, is_user_subscribed
+import requests
+from datetime import datetime, timedelta
+from functools import wraps
+from flask import session, jsonify, make_response, url_for, request
+from app.config import SECRET_KEY, DATA_FOLDER, SESSION_COOKIE_DOMAIN, SESSION_COOKIE_SECURE, TWITCH_CLIENT_ID
+from app.database import get_user_role, load_json_file, save_json_file, get_users_cached, check_user_whitelisted, save_users
 from app.audit_logger import add_audit_log
-from app.models.token_manager import create_token, delete_token
+from app.twitch_api import get_broadcaster_id, is_user_subscribed
 
-def get_twitch_redirect_uri():
-    """Gibt die Redirect-URI für Twitch zurück"""
-    return f"{BASE_URL}/auth/callback"
-
+# ========== CSRF Token ==========
 def generate_csrf_token():
-    """Generiert einen CSRF-Token"""
+    """Generiert einen neuen CSRF Token"""
     if 'csrf_token' not in session:
-        session['csrf_token'] = secrets.token_hex(32)
+        session['csrf_token'] = secrets.token_urlsafe(32)
     return session['csrf_token']
 
 def validate_csrf():
-    """Validiert einen CSRF-Token"""
-    from flask import request
+    """Validiert den CSRF Token"""
     if request.method in ['POST', 'PUT', 'DELETE', 'PATCH']:
         token = request.headers.get('X-CSRF-Token') or (request.json.get('csrf_token') if request.is_json else request.form.get('csrf_token'))
         if not token or not hmac.compare_digest(token, session.get('csrf_token', '')):
@@ -100,7 +98,29 @@ def process_twitch_login(access_token):
         }, 200
     except Exception as e:
         print(f"Exception in process_twitch_login: {e}")
+        import traceback
+        traceback.print_exc()
         return {'error': str(e)}, 500
+
+def create_token(username):
+    """Erstellt einen Auth Token"""
+    token = secrets.token_urlsafe(64)
+    expires = (datetime.now() + timedelta(days=7)).isoformat()
+    
+    tokens = load_json_file('active_tokens.json')
+    
+    # FIX: Stelle sicher, dass tokens ein Dictionary ist
+    if not isinstance(tokens, dict):
+        tokens = {}
+    
+    tokens[token] = {
+        'username': username,
+        'created': datetime.now().isoformat(),
+        'expires': expires
+    }
+    save_json_file('active_tokens.json', tokens)
+    
+    return token, expires
 
 def create_login_response(user_data, csrf_token):
     """Erstellt eine Login-Response mit Cookie"""
@@ -108,7 +128,7 @@ def create_login_response(user_data, csrf_token):
     resp = make_response(jsonify({
         'access': True,
         'user': user_data,
-        'redirect': url_for('index'),
+        'redirect': url_for('main.index'),
         'csrf_token': csrf_token
     }))
     resp.set_cookie(
@@ -121,3 +141,16 @@ def create_login_response(user_data, csrf_token):
         domain=SESSION_COOKIE_DOMAIN
     )
     return resp
+
+def login_required_api(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        user = session.get("user")
+        if not user:
+            # Wenn Browser normal navigiert, könnte man redirecten,
+            # aber für API/AJAX immer JSON:
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "unauthorized"}), 401
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated

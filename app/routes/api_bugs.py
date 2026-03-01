@@ -7,7 +7,7 @@ import threading
 from flask import Blueprint, jsonify, request, session
 from datetime import datetime, timezone
 from app.decorators import login_required, api_role_required
-from app.auth import validate_csrf, generate_csrf_token
+from app.auth import validate_csrf, generate_csrf_token, login_required_api
 from app.audit_logger import add_audit_log
 from app.config import BUG_REPORT_FILE
 
@@ -15,7 +15,7 @@ bugs_bp = Blueprint('bugs', __name__, url_prefix='/api')
 bug_lock = threading.Lock()
 
 @bugs_bp.route('/bugreports', methods=['GET'])
-@login_required
+@login_required_api
 def get_bug_reports():
     try:
         with bug_lock:
@@ -24,7 +24,7 @@ def get_bug_reports():
                     reports = json.load(f)
             except (FileNotFoundError, json.JSONDecodeError):
                 reports = []
-        
+
         user_role = session['user']['role']
         username = session['user']['name']
 

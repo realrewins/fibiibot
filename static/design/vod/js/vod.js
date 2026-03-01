@@ -1,4 +1,3 @@
-/* ========= State ========= */
 let currentUser = { name: null, display_name: null, role: 'editor', avatar: '', id: null };
 let csrfToken = null;
 
@@ -8,36 +7,36 @@ let liveStatusInterval = null;
 
 let hlsPlayer = null;
 let currentVideoId = null;
+let currentOutages = [];
 let currentVideoDuration = 0;
+
 let clipStart = 0;
 let clipEnd = 0;
-let clipGenerating = false;
+let clipGeneratedHash = null;
 
-/* ========= Boot ========= */
+let video, playPauseBtn, muteBtn, volumeSlider, fullscreenBtn;
+let progressContainer, progressBar, timeDisplay, bigPlayBtn, videoContainer;
+let isDragging = false;
+
 window.addEventListener('load', () => {
-  initApp().catch(err => console.error('[VOD] initApp failed', err));
+  initApp().catch(err => console.error(err));
 });
 
-/* ========= Init ========= */
 async function initApp() {
-  // 1) Login-Check holen (setzt csrfToken, currentUser, Header UI)
   await bootstrapSession();
 
-  // 2) Live Status initial + Polling
   await updateLiveStatus();
   if (liveStatusInterval) clearInterval(liveStatusInterval);
   liveStatusInterval = setInterval(updateLiveStatus, 30000);
 
-  // 3) VODs laden
   await loadVods();
 
-  // 4) Notifications initial + Polling
   await loadNotifications();
   if (notificationCheckInterval) clearInterval(notificationCheckInterval);
   notificationCheckInterval = setInterval(checkForNewNotifications, 5000);
 
-  // 5) UI Events
   wireUiEvents();
+  initPlayerElements();
 }
 
 async function bootstrapSession() {
@@ -61,7 +60,6 @@ async function bootstrapSession() {
   csrfToken = result.csrf_token;
   currentUser = result.user;
 
-  // Header UI
   const profileAvatar = document.getElementById('profileAvatar');
   const dropdownAvatar = document.getElementById('dropdownAvatar');
   const dropdownName = document.getElementById('dropdownName');
@@ -73,7 +71,6 @@ async function bootstrapSession() {
   if (dropdownRole) dropdownRole.innerText = currentUser.role || '';
 }
 
-/* ========= Live ========= */
 async function updateLiveStatus() {
   try {
     const res = await fetch('/api/stream/info');
@@ -87,7 +84,6 @@ async function updateLiveStatus() {
 
     if (!liveSection || !statusEl || !streamInfoEl || !container || !buttonContainer) return;
 
-    // ensure elements exist
     let titleEl = streamInfoEl.querySelector('.stream-title');
     let metaEl = streamInfoEl.querySelector('.stream-meta');
     if (!titleEl) {
@@ -130,7 +126,6 @@ async function updateLiveStatus() {
       if (twitchLink) twitchLink.href = `https://twitch.tv/${channel}`;
       buttonContainer.style.display = 'block';
     } else {
-      // OFFLINE: remove whole live section to avoid black box
       liveSection.style.display = 'none';
       statusEl.innerHTML = '<span class="live-dot offline"></span> Offline';
       titleEl.innerText = '';
@@ -139,74 +134,66 @@ async function updateLiveStatus() {
       buttonContainer.style.display = 'none';
     }
   } catch (e) {
-    console.error('[VOD] updateLiveStatus error', e);
   }
 }
 
-/* ========= VOD list ========= */
 async function loadVods() {
-  const grid = document.getElementById('vod-grid');
-  if (!grid) return;
+    const grid = document.getElementById('vod-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    try {
+        const res = await fetch('/api/vods');
+        const data = await res.json();
+        const vods = Array.isArray(data.vods) ? data.vods : [];
+        
+        if (vods.length === 0) {
+            grid.innerHTML = '<div class="empty-state">Keine aufgezeichneten Streams vorhanden.</div>';
+            return;
+        }
 
-  grid.innerHTML = '';
+        vods.forEach(vod => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // Berechnung der Dauer für Live-Aufnahmen
+            let displayDuration = vod.duration;
+            if (!vod.ended_at && vod.date) {
+                const startTime = new Date(vod.date).getTime();
+                const now = new Date().getTime();
+                displayDuration = Math.floor((now - startTime) / 1000);
+            }
 
-  try {
-    const res = await fetch('/api/vods');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const vods = Array.isArray(data.vods) ? data.vods : [];
+            const dateText = vod.date ? new Date(vod.date).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+            const durationText = typeof displayDuration === 'number' ? formatDurationText(displayDuration) : '0s';
 
-    if (vods.length === 0) {
-      grid.innerHTML = '<div class="empty-state">Keine aufgezeichneten Streams vorhanden.</div>';
-      return;
+            card.innerHTML = `
+                <div class="thumb" data-vod-id="${escapeHtmlAttr(vod.id)}">
+                    <img src="${escapeHtmlAttr(vod.thumbnail || '')}" alt="">
+                    <span class="game-badge">${escapeHtml(vod.game || 'Aufnahme')}</span>
+                    <span class="time-badge ${!vod.ended_at ? 'live-recording' : ''}">${!vod.ended_at ? '<i class="fas fa-circle"></i> ' : ''}${escapeHtml(durationText)}</span>
+                    <div class="play-overlay"><div class="play-icon"></div></div>
+                </div>
+                <div class="info">
+                    <div class="meta-row"><span>${escapeHtml(dateText)}</span></div>
+                    <div class="title">${escapeHtml(vod.title || 'Unbekannter Stream')}</div>
+                    <div class="actions">
+                        <span class="file-size">${escapeHtml(durationText)}</span>
+                        <div class="btn-group">
+                            <a href="#" class="btn-icon dl" title="Download" data-dl="${escapeHtmlAttr(vod.id)}"><i class="fas fa-download"></i></a>
+                            <a href="#" class="btn-icon del" title="Löschen" data-del="${escapeHtmlAttr(vod.id)}"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+            card.querySelector('.thumb')?.addEventListener('click', () => playVOD(vod.id));
+        });
+    } catch (e) {
+        grid.innerHTML = '<div class="empty-state">Fehler beim Laden der VODs.</div>';
     }
-
-    vods.forEach(vod => {
-      const card = document.createElement('div');
-      card.className = 'card';
-
-      const dateText = vod.date
-        ? new Date(vod.date).toLocaleString('de-DE', {
-          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-        })
-        : '-';
-
-      const durationText = typeof vod.duration === 'number' ? formatDuration(vod.duration) : '-';
-
-      // NOTE: no inline onclick => avoids "playVOD is not defined"
-      card.innerHTML = `
-        <div class="thumb" data-vod-id="${escapeHtmlAttr(vod.id)}">
-          <img src="${escapeHtmlAttr(vod.thumbnail || '')}" alt="">
-          <span class="game-badge">${escapeHtml(vod.game || 'Aufnahme')}</span>
-          <span class="time-badge">${escapeHtml(durationText)}</span>
-          <div class="play-overlay"><div class="play-icon"></div></div>
-        </div>
-        <div class="info">
-          <div class="meta-row"><span>${escapeHtml(dateText)}</span></div>
-          <div class="title">${escapeHtml(vod.title || 'Unbekannter Stream')}</div>
-          <div class="actions">
-            <span class="file-size">${escapeHtml(durationText)}</span>
-            <div class="btn-group">
-              <a href="#" class="btn-icon dl" title="Download" data-dl="${escapeHtmlAttr(vod.id)}"><i class="fas fa-download"></i></a>
-              <a href="#" class="btn-icon del" title="Löschen" data-del="${escapeHtmlAttr(vod.id)}"><i class="fas fa-trash"></i></a>
-            </div>
-          </div>
-        </div>
-      `;
-
-      grid.appendChild(card);
-
-      card.querySelector('.thumb')?.addEventListener('click', () => playVOD(vod.id));
-      card.querySelector('[data-dl]')?.addEventListener('click', (e) => { e.preventDefault(); downloadVOD(vod.id); });
-      card.querySelector('[data-del]')?.addEventListener('click', (e) => { e.preventDefault(); deleteVOD(vod.id); });
-    });
-  } catch (e) {
-    console.error('[VOD] loadVods error', e);
-    grid.innerHTML = '<div class="empty-state">Fehler beim Laden der VODs.</div>';
-  }
 }
 
-function formatDuration(seconds) {
+function formatDurationText(seconds) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
@@ -215,7 +202,6 @@ function formatDuration(seconds) {
   return `${s}s`;
 }
 
-/* ========= VOD Player Modal ========= */
 function openVodModal() {
   const modal = document.getElementById('vodPlayerModal');
   if (!modal) return;
@@ -237,79 +223,213 @@ function closeVodModal() {
       hlsPlayer = null;
     }
 
-    const video = document.getElementById('vodVideo');
     if (video) {
       video.pause();
       video.src = '';
     }
 
-    // reset clip state (if elements exist)
-    const clipStartEl = document.getElementById('clipStart');
-    const clipEndEl = document.getElementById('clipEnd');
-    const clipNameEl = document.getElementById('clipName');
-    if (clipStartEl) clipStartEl.value = '0:00';
-    if (clipEndEl) clipEndEl.value = '0:00';
-    if (clipNameEl) clipNameEl.value = '';
-
+    currentVideoId = null;
     clipStart = 0;
     clipEnd = 0;
-    currentVideoId = null;
+    clipGeneratedHash = null;
+
+    const clipStartDisplay = document.getElementById('clipStartDisplay');
+    const clipEndDisplay = document.getElementById('clipEndDisplay');
+    const clipTitleInput = document.getElementById('clipTitleInput');
+    
+    if (clipStartDisplay) clipStartDisplay.innerText = '00:00:00';
+    if (clipEndDisplay) clipEndDisplay.innerText = '00:00:00';
+    if (clipTitleInput) clipTitleInput.value = '';
+    
+    document.getElementById('clipLoadingArea').style.maxHeight = '0px';
+    document.getElementById('clipLoadingArea').style.marginTop = '0px';
+    document.getElementById('clipResultArea').style.maxHeight = '0px';
+    document.getElementById('clipResultArea').style.marginTop = '0px';
+    document.getElementById('clipResultImg').src = '';
+
   }, 300);
 }
 
-async function playVOD(streamId) {
-  try {
-    const res = await fetch(`/api/vod/${encodeURIComponent(streamId)}/info`);
-    if (!res.ok) throw new Error(`vod info http ${res.status}`);
-    const meta = await res.json();
+function initPlayerElements() {
+  video = document.getElementById('vodVideo');
+  playPauseBtn = document.getElementById('playPauseBtn');
+  muteBtn = document.getElementById('muteBtn');
+  volumeSlider = document.getElementById('volumeSlider');
+  fullscreenBtn = document.getElementById('fullscreenBtn');
+  progressContainer = document.getElementById('progressContainer');
+  progressBar = document.getElementById('progressBar');
+  timeDisplay = document.getElementById('timeDisplay');
+  bigPlayBtn = document.getElementById('bigPlayBtn');
+  videoContainer = document.getElementById('videoContainer');
 
-    currentVideoId = streamId;
-    currentVideoDuration = meta.duration || 0;
+  setupPlayerControls();
+}
 
-    const titleEl = document.getElementById('vodModalTitle');
-    const gameEl = document.getElementById('vodGameBadge');
-    if (titleEl) titleEl.innerText = meta.title || 'Stream';
-    if (gameEl) gameEl.innerText = meta.game || 'Unbekannt';
-
-    // Outages (optional)
-    if (typeof renderOutages === 'function') renderOutages(meta.outages || []);
-
-    const video = document.getElementById('vodVideo');
-    if (!video) throw new Error('missing #vodVideo');
-
-    const playlistUrl = `/api/vod/${encodeURIComponent(streamId)}/video/playlist.m3u8`;
-
-    // quick existence check
-    const headRes = await fetch(playlistUrl, { method: 'HEAD' });
-    if (!headRes.ok) {
-      alert('Stream-Daten noch nicht verfügbar. Bitte später erneut versuchen.');
-      return;
-    }
-
-    if (window.Hls && Hls.isSupported()) {
-      if (hlsPlayer) hlsPlayer.destroy();
-      hlsPlayer = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 });
-      hlsPlayer.loadSource(playlistUrl);
-      hlsPlayer.attachMedia(video);
-      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => {});
+function attemptPlay() {
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+      playPromise.then(() => {
+          bigPlayBtn.style.display = 'none';
+          updatePlayPauseIcon();
+      }).catch(() => {
+          bigPlayBtn.style.display = 'flex';
+          updatePlayPauseIcon();
       });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = playlistUrl;
-      video.addEventListener('loadedmetadata', () => video.play().catch(() => {}), { once: true });
-    } else {
-      alert('Dein Browser unterstützt kein HLS-Streaming.');
-      return;
-    }
-
-    openVodModal();
-  } catch (e) {
-    console.error('[VOD] playVOD error', e);
-    alert('VOD konnte nicht geladen werden.');
   }
 }
 
-/* ========= Outages (minimal – keeps your markup working) ========= */
+function formatClipTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateProgressFromEvent(e) {
+  const rect = progressContainer.getBoundingClientRect();
+  let pos = (e.clientX - rect.left) / rect.width;
+  if (pos < 0) pos = 0;
+  if (pos > 1) pos = 1;
+  
+  let newTime = pos * currentVideoDuration;
+  video.currentTime = newTime;
+  
+  progressBar.style.width = `${pos * 100}%`;
+  const dot = document.getElementById('progressDot');
+  if(dot) dot.style.left = `${pos * 100}%`;
+  timeDisplay.innerText = `${formatClipTime(newTime)} / ${formatClipTime(currentVideoDuration)}`;
+}
+
+function setupPlayerControls() {
+    video.addEventListener('durationchange', () => {
+        if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
+            currentVideoDuration = video.duration;
+        }
+    });
+
+    video.addEventListener('timeupdate', () => {
+        if (isDragging) return;
+        
+        const curr = video.currentTime;
+        let percent = (curr / currentVideoDuration) * 100;
+        
+        progressBar.style.width = `${Math.min(100, percent)}%`;
+        const dot = document.getElementById('progressDot');
+        if (dot) dot.style.left = `${Math.min(100, percent)}%`;
+        
+        timeDisplay.innerText = `${formatClipTime(curr)} / ${formatClipTime(currentVideoDuration)}`;
+    });
+
+    playPauseBtn.addEventListener('click', togglePlay);
+    bigPlayBtn.addEventListener('click', togglePlay);
+    video.addEventListener('click', togglePlay);
+    
+    video.addEventListener('play', () => { 
+        bigPlayBtn.style.display = 'none'; 
+        updatePlayPauseIcon(); 
+    });
+    
+    video.addEventListener('pause', () => { 
+        bigPlayBtn.style.display = 'flex'; 
+        updatePlayPauseIcon(); 
+    });
+
+    muteBtn.addEventListener('click', () => {
+        video.muted = !video.muted;
+        volumeSlider.value = video.muted ? 0 : (video.volume || 1);
+        updateMuteIcon();
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+        video.volume = e.target.value;
+        video.muted = video.volume === 0;
+        updateMuteIcon();
+    });
+
+    progressContainer.addEventListener('mousedown', (e) => { 
+        isDragging = true; 
+        updateProgressFromEvent(e); 
+    });
+    
+    document.addEventListener('mousemove', (e) => { 
+        if (isDragging) updateProgressFromEvent(e); 
+    });
+    
+    document.addEventListener('mouseup', () => { 
+        isDragging = false; 
+    });
+
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            videoContainer.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    });
+}
+
+function togglePlay() {
+  if (video.paused) {
+      video.play().catch(()=>{});
+  } else {
+      video.pause();
+  }
+}
+
+function updatePlayPauseIcon() {
+  if (video.paused) {
+      playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+  } else {
+      playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+  }
+}
+
+function updateMuteIcon() {
+  if (video.muted || video.volume === 0) {
+      muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+  } else if (video.volume < 0.5) {
+      muteBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+  } else {
+      muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+  }
+}
+
+async function playVOD(streamId) {
+    try {
+        const res = await fetch(`/api/vod/${encodeURIComponent(streamId)}/info`);
+        const meta = await res.json();
+        currentVideoId = streamId;
+        currentOutages = meta.outages || [];
+        
+        document.getElementById('vodModalTitle').innerText = meta.title || 'Stream';
+        document.getElementById('vodGameBadge').innerHTML = `<i class="fas fa-gamepad"></i> ${meta.game || 'Unbekannt'}`;
+        
+        renderOutageDrawer(currentOutages);
+        
+        if (window.Hls && Hls.isSupported()) {
+            if (hlsPlayer) hlsPlayer.destroy();
+            hlsPlayer = new Hls();
+            hlsPlayer.loadSource(meta.video_url);
+            hlsPlayer.attachMedia(video);
+            hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+                currentVideoDuration = video.duration;
+                renderTimelineMarkers(meta.chapters);
+                video.play().catch(() => {});
+            });
+        } else {
+            video.src = meta.video_url;
+            video.addEventListener('loadedmetadata', () => {
+                currentVideoDuration = video.duration;
+                renderTimelineMarkers(meta.chapters);
+                video.play().catch(() => {});
+            });
+        }
+        openVodModal();
+    } catch (e) {
+        alert('Fehler beim Laden des VODs');
+    }
+}
+
 function toggleOutages() {
   const list = document.getElementById('outagesList');
   const chevron = document.getElementById('outagesChevron');
@@ -324,19 +444,120 @@ function toggleOutages() {
 }
 
 function renderOutages(outages) {
+  const wrapper = document.getElementById('vodOutagesWrapper');
   const container = document.getElementById('outagesList');
-  if (!container) return;
+  if (!container || !wrapper) return;
+  
   container.innerHTML = '';
+  
   if (!outages || outages.length === 0) {
-    container.innerHTML = '<div class="outage-item">Keine Ausfälle aufgezeichnet</div>';
+    wrapper.style.display = 'none';
     return;
   }
+  
+  wrapper.style.display = 'block';
   outages.forEach(([start, end]) => {
     const div = document.createElement('div');
     div.className = 'outage-item';
     div.innerHTML = `<span>${formatTimeForOutage(start)} – ${formatTimeForOutage(end)}</span><span>${(end - start).toFixed(1)}s</span>`;
     container.appendChild(div);
   });
+}
+
+function renderOutageMarkers(outages, startedAt) {
+    const container = document.getElementById('progressContainer');
+    container.querySelectorAll('.timeline-outage').forEach(m => m.remove());
+
+    if (!outages || outages.length === 0 || !currentVideoDuration) return;
+
+    const streamStart = new Date(startedAt).getTime() / 1000;
+
+    outages.forEach(outage => {
+        const [outageStartSec, outageEndSec] = outage;
+
+        const startPercent = (outageStartSec / currentVideoDuration) * 100;
+        const durationSec = outageEndSec - outageStartSec;
+        const widthPercent = (durationSec / currentVideoDuration) * 100;
+
+        if (startPercent < 100) {
+            const outageEl = document.createElement('div');
+            outageEl.className = 'timeline-outage';
+            outageEl.style.left = `${startPercent}%`;
+            outageEl.style.width = `${Math.min(widthPercent, 100 - startPercent)}%`;
+            container.appendChild(outageEl);
+        }
+    });
+}
+
+function renderOutageDrawer(outages) {
+    const drawer = document.getElementById('outageDrawer');
+    const list = document.getElementById('outageList');
+    const count = document.getElementById('outageCount');
+    
+    if (!outages || outages.length === 0) {
+        if (drawer) drawer.style.display = 'none';
+        return;
+    }
+    
+    drawer.style.display = 'flex';
+    count.innerText = outages.length;
+    list.innerHTML = '';
+
+    outages.forEach(ot => {
+        const item = document.createElement('div');
+        item.className = 'outage-item';
+        const triggerPoint = ot.time || ot.start_sec;
+        const duration = ot.duration || (ot.end_sec - ot.start_sec);
+        const readable = ot.readable_time || ot.readable || formatClipTime(triggerPoint);
+
+        item.innerHTML = `<span><b>${readable}</b></span><span style="opacity:0.6">|</span><span>${Math.round(duration)}s</span>`;
+        item.onclick = (e) => {
+            e.stopPropagation();
+            video.currentTime = Math.max(0, triggerPoint - 2);
+            video.play().catch(() => {});
+        };
+        list.appendChild(item);
+    });
+
+    document.getElementById('outageToggle').onclick = (e) => {
+        e.stopPropagation();
+        drawer.classList.toggle('expanded');
+    };
+}
+
+function renderTimelineMarkers(chapters) {
+    const container = document.getElementById('progressContainer');
+    if (!container) return;
+
+    container.querySelectorAll('.timeline-marker').forEach(m => m.remove());
+    
+    if (!currentVideoDuration || currentVideoDuration === 0) return;
+
+    if (chapters) {
+        chapters.forEach(ch => {
+            if (ch.stream_sec <= 0) return;
+            const marker = document.createElement('div');
+            marker.className = 'timeline-marker';
+            const percent = (ch.stream_sec / currentVideoDuration) * 100;
+            marker.style.left = `${Math.min(100, percent)}%`;
+            container.appendChild(marker);
+        });
+    }
+}
+
+function handleOutagePlayback() {
+    video.addEventListener('timeupdate', () => {
+        if (!currentOutages) return;
+        
+        const curr = video.currentTime;
+        currentOutages.forEach(outage => {
+            const [start, end] = outage;
+            if (curr >= start && curr < end) {
+                video.currentTime = end;
+                showToast("Ausfall übersprungen", 2000);
+            }
+        });
+    });
 }
 
 function formatTimeForOutage(seconds) {
@@ -347,39 +568,155 @@ function formatTimeForOutage(seconds) {
   return `${m}:${String(s).padStart(2,'0')}`;
 }
 
-/* ========= Clip (placeholders: keep buttons from crashing) ========= */
 function setClipStart() {
-  const video = document.getElementById('vodVideo');
-  if (!video) return;
-  clipStart = Math.floor(video.currentTime);
-  const el = document.getElementById('clipStart');
-  if (el) el.value = formatClipTime(clipStart);
-}
-function setClipEnd() {
-  const video = document.getElementById('vodVideo');
-  if (!video) return;
-  clipEnd = Math.floor(video.currentTime);
-  const el = document.getElementById('clipEnd');
-  if (el) el.value = formatClipTime(clipEnd);
-}
-function formatClipTime(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
-async function createClip() {
-  alert('Clip-Feature ist in dieser Version nicht vollständig implementiert.');
-}
-function downloadClip() {
-  alert('Download-Feature ist in dieser Version nicht vollständig implementiert.');
-}
-function generateClipLink() {
-  alert('Link-Feature ist in dieser Version nicht vollständig implementiert.');
+    if (!video) return;
+    clipStart = video.currentTime;
+    document.getElementById('clipStartDisplay').innerText = formatClipTime(clipStart);
 }
 
-/* ========= Notifications ========= */
+function setClipEnd() {
+    if (!video) return;
+    clipEnd = video.currentTime;
+    document.getElementById('clipEndDisplay').innerText = formatClipTime(clipEnd);
+}
+
+function createClip() {
+    const title = document.getElementById('clipTitleInput').value.trim();
+    if (!title) {
+        alert("Bitte gib einen Clip-Titel ein.");
+        return;
+    }
+    if (clipEnd <= clipStart || clipEnd === 0) {
+        alert("Bitte setze ein gültiges Start- und Enddatum.");
+        return;
+    }
+
+    const btn = document.getElementById('createClipBtn');
+    const loadArea = document.getElementById('clipLoadingArea');
+    const resultArea = document.getElementById('clipResultArea');
+    const bar = document.getElementById('clipLoadingBar');
+
+    btn.disabled = true;
+    resultArea.style.maxHeight = '0px';
+    resultArea.style.marginTop = '0px';
+
+    loadArea.style.maxHeight = '20px';
+    loadArea.style.marginTop = '15px';
+    bar.style.width = '0%';
+
+    let progress = 0;
+    let apiDone = false;
+
+    fetch('/api/clip/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({
+            streamId: currentVideoId,
+            start: clipStart,
+            end: clipEnd,
+            startFormatted: formatClipTime(clipStart),
+            endFormatted: formatClipTime(clipEnd),
+            name: title
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.hash) {
+            clipGeneratedHash = data.hash;
+        }
+        apiDone = true;
+    })
+    .catch(err => {
+        apiDone = true;
+    });
+
+    function advanceBar() {
+        if (progress >= 100) return;
+
+        let jump = Math.random() * 12 + 5;
+        progress += jump;
+
+        if (progress > 85 && !apiDone) {
+            progress = 85; 
+        }
+
+        if (progress >= 100) {
+            progress = 100;
+            bar.style.width = '100%';
+            setTimeout(showClipResult, 400);
+            return;
+        }
+
+        bar.style.width = `${progress}%`;
+
+        let nextTick = Math.random() * 200 + 100;
+        if (Math.random() < 0.3) {
+            nextTick += 500; 
+        }
+
+        setTimeout(advanceBar, nextTick);
+    }
+    
+    setTimeout(advanceBar, 100);
+}
+
+function showClipResult() {
+    document.getElementById('clipLoadingArea').style.maxHeight = '0px';
+    document.getElementById('createClipBtn').disabled = false;
+    
+    // Cache-Buster mit Date.now() sorgt dafür, dass das Bild neu geladen wird
+    const thumbImg = document.getElementById('clipResultImg');
+    thumbImg.src = `/api/vod/clips/${clipGeneratedHash}/thumbnail.png?t=${Date.now()}`;
+    
+    // Klick auf das Bild pausiert den Player und öffnet Clip
+    thumbImg.onclick = () => {
+        video.pause();
+        updatePlayPauseIcon();
+        window.open(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`, '_blank');
+    };
+
+    document.getElementById('clipLinkSpan').innerText = `fibiibot.com/vod/clips/${clipGeneratedHash}`;
+    
+    const resArea = document.getElementById('clipResultArea');
+    resArea.style.marginTop = '15px';
+    resArea.style.maxHeight = '400px';
+    showToast('Clip erstellt!');
+}
+
+function copyGeneratedLink() {
+    // Pausiert den Player beim Kopieren/Öffnen
+    video.pause();
+    updatePlayPauseIcon();
+    
+    navigator.clipboard.writeText(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`);
+    showToast('Link kopiert!');
+    window.open(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`, '_blank');
+}
+
+async function downloadGeneratedClip() {
+    // Pausiert den Player beim Download
+    video.pause();
+    updatePlayPauseIcon();
+
+    const btn = document.getElementById('modalDownloadBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    const res = await fetch(`/api/clip/${clipGeneratedHash}/status`);
+    const data = await res.json();
+    
+    if (!data.ready) {
+        showToast('Clip wird noch verarbeitet...');
+        setTimeout(() => { btn.innerHTML = '<i class="fas fa-download"></i>'; }, 2000);
+        return;
+    }
+    
+    window.location.href = `/api/clip/${clipGeneratedHash}/download`;
+    setTimeout(() => { btn.innerHTML = '<i class="fas fa-download"></i>'; }, 3000);
+}
+
 async function loadNotifications() {
   try {
     const response = await fetch('/api/notifications');
@@ -388,7 +725,6 @@ async function loadNotifications() {
     renderNotifications(data.notifications);
     lastNotificationCount = data.notifications ? data.notifications.length : 0;
   } catch (e) {
-    console.error('Fehler beim Laden der Notifications', e);
   }
 }
 
@@ -403,7 +739,6 @@ async function checkForNewNotifications() {
     const dropdown = document.getElementById('notificationDropdown');
     if (dropdown && !dropdown.classList.contains('show')) renderNotifications(data.notifications);
   } catch (e) {
-    console.error(e);
   }
 }
 
@@ -452,16 +787,10 @@ async function markNotificationsAsRead() {
         'X-CSRF-Token': csrfToken
       }
     });
-    if (!res.ok) {
-      // if this still 403s, csrfToken is not set or session mismatch
-      console.warn('[notifications/read] failed', res.status);
-    }
   } catch (e) {
-    console.error(e);
   }
 }
 
-/* ========= Bugreport Modal (frontend submit only; modal markup must exist) ========= */
 async function submitBugReport() {
   const subjectInput = document.getElementById('bugSubject');
   const descInput = document.getElementById('bugDescription');
@@ -485,7 +814,6 @@ async function submitBugReport() {
   }
 }
 
-/* ========= UI helpers ========= */
 function showToast(message, duration = 4000) {
   const toast = document.getElementById('toast');
   const msg = document.getElementById('toastMessage');
@@ -494,6 +822,7 @@ function showToast(message, duration = 4000) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), duration);
 }
+
 function openModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
@@ -501,12 +830,14 @@ function openModal(id) {
   modal.offsetHeight;
   modal.classList.add('show');
 }
+
 function closeModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.remove('show');
   setTimeout(() => { modal.style.display = 'none'; }, 300);
 }
+
 async function logout() {
   try {
     await fetch('/api/logout', {
@@ -519,7 +850,6 @@ async function logout() {
   }
 }
 
-/* ========= Wire UI events ========= */
 function wireUiEvents() {
   document.getElementById('bugReportBtn')?.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -562,15 +892,14 @@ function wireUiEvents() {
   });
 }
 
-/* ========= Download/Delete placeholders ========= */
 function downloadVOD(id) {
   alert('Download (noch nicht implementiert)');
 }
+
 function deleteVOD(id) {
   if (confirm('Wirklich löschen?')) alert('Gelöscht (noch nicht implementiert)');
 }
 
-/* ========= tiny escaping helpers ========= */
 function escapeHtml(str) {
   return String(str)
     .replaceAll('&', '&amp;')
@@ -579,6 +908,7 @@ function escapeHtml(str) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 }
+
 function escapeHtmlAttr(str) {
   return escapeHtml(str).replaceAll('`', '&#096;');
 }

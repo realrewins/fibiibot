@@ -810,13 +810,26 @@ body {
 }
 .card {
     background: var(--card-bg);
-    border: 1px solid var(--border-light);
+    border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
-    transition: all 0.3s ease;
-    animation: cardAppear 0.5s ease forwards;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transform-origin: center;
+    animation: cardAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     opacity: 0;
     transform: translateY(20px);
+}
+.card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(145, 70, 255, 0.15) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
 }
 .card:nth-child(1) { animation-delay: 0.1s; }
 .card:nth-child(2) { animation-delay: 0.2s; }
@@ -830,9 +843,12 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 .card:hover {
-    transform: translateY(-4px);
-    border-color: var(--border-accent);
-    box-shadow: 0 8px 20px rgba(138, 79, 255, 0.15);
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(145, 70, 255, 0.2);
+}
+.card:hover::after {
+    opacity: 1;
 }
 .thumb {
     position: relative;
@@ -851,7 +867,7 @@ body {
 }
 .card:hover .thumb img {
     opacity: 1;
-    transform: scale(1.03);
+    transform: scale(1.05);
 }
 .game-badge {
     position: absolute;
@@ -878,18 +894,33 @@ body {
     font-family: monospace;
     font-weight: 600;
 }
-.play-overlay {
-    position: absolute;
-    inset: 0;
+.play-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--accent); /* Sofort gefüllt */
+    color: white;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.3);
-    opacity: 0;
-    transition: 0.2s;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 20px rgba(145, 70, 255, 0.4);
 }
 .card:hover .play-overlay {
     opacity: 1;
+}
+.card:hover .play-icon {
+    transform: scale(1);
+}
+.time-badge.live-recording {
+    background: rgba(239, 68, 68, 0.9);
+    animation: pulse 2s infinite;
+}
+.time-badge.live-recording i {
+    font-size: 8px;
+    margin-right: 4px;
+    vertical-align: middle;
 }
 .play-icon {
     width: 50px;
@@ -905,8 +936,7 @@ body {
 }
 .play-icon::after {
     content: '▶';
-    font-size: 18px;
-    color: #fff;
+    font-size: 22px;
     margin-left: 4px;
 }
 .play-icon:hover {
@@ -1259,4 +1289,511 @@ body {
 .clip-generate:hover {
     background: rgba(138, 79, 255, 0.15);
     color: var(--accent);
+}
+.custom-player {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.big-play-overlay {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: rgba(145, 70, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(145, 70, 255, 0.6);
+    transition: 0.2s;
+    z-index: 10;
+}
+.big-play-overlay:hover {
+    transform: scale(1.1);
+    background: rgba(145, 70, 255, 1);
+}
+.player-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: 20px 15px 10px 15px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 20;
+}
+.custom-player:hover .player-controls,
+.player-controls.active {
+    opacity: 1;
+}
+.progress-bar-container {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05); /* Fast unsichtbar */
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+    transition: height 0.2s;
+}
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 3px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(145, 70, 255, 0.6);
+    overflow: hidden;
+}
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: shimmer 1.5s infinite linear;
+}
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+.controls-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.control-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+}
+.control-btn:hover {
+    color: var(--accent);
+}
+.time-display {
+    color: white;
+    font-family: monospace;
+    font-size: 0.95rem;
+    font-weight: bold;
+    user-select: none;
+}
+.volume-slider {
+    width: 80px;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+.spacer {
+    flex: 1;
+}
+.clip-thumbnail-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.clip-thumbnail-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.clip-thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s;
+}
+.clip-thumbnail-wrapper:hover .clip-thumb-overlay {
+    opacity: 1;
+}
+.clip-thumb-overlay i {
+    color: white;
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+}
+.clip-link-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.clip-link-row:hover {
+    border-color: var(--accent);
+}
+.clip-link-row span {
+    flex: 1;
+    font-family: monospace;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.clip-link-row i {
+    color: var(--text-secondary);
+}
+.btn-full-width {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-weight: 600;
+}
+.custom-player {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.big-play-overlay {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: rgba(145, 70, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(145, 70, 255, 0.6);
+    transition: 0.2s;
+    z-index: 10;
+}
+
+.big-play-overlay:hover {
+    transform: scale(1.1);
+    background: rgba(145, 70, 255, 1);
+}
+
+.player-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: 20px 15px 10px 15px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 20;
+}
+
+.custom-player:hover .player-controls,
+.player-controls.active {
+    opacity: 1;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.progress-bar-bg {
+    display: none; /* Hintergrund komplett ausblenden */
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    position: relative;
+    z-index: 2;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: shimmer 1.5s infinite linear;
+}
+
+.progress-dot {
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.progress-bar-container:hover .progress-dot {
+    opacity: 1;
+}
+
+.custom-player:hover .progress-dot {
+    opacity: 1;
+}
+
+.progress-bar-container:hover {
+    height: 8px;
+}
+.controls-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.control-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    color: var(--accent);
+}
+
+.time-display {
+    color: white;
+    font-family: monospace;
+    font-size: 0.95rem;
+    font-weight: bold;
+    user-select: none;
+}
+
+.volume-slider {
+    width: 80px;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.spacer {
+    flex: 1;
+}
+
+/* Clip Result Layout */
+.clip-thumbnail-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: black;
+}
+
+.clip-thumbnail-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.clip-thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.clip-thumbnail-wrapper:hover .clip-thumb-overlay {
+    opacity: 1;
+}
+
+.clip-thumb-overlay i {
+    color: white;
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+}
+
+.clip-link-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.clip-link-row:hover {
+    border-color: var(--accent);
+}
+
+.clip-link-row span {
+    flex: 1;
+    font-family: monospace;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clip-link-row i {
+    color: var(--text-secondary);
+}
+
+.btn-full-width {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-weight: 600;
+}
+.vod-meta-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 0 5px;
+}
+
+.game-badge, .outage-btn {
+    height: 40px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+}
+
+.game-badge {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.game-badge i {
+    color: var(--accent);
+    margin-right: 10px;
+}
+
+.outage-drawer {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 79, 79, 0.1);
+    border: 1px solid rgba(255, 79, 79, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 150px;
+    height: 40px;
+}
+
+.outage-drawer.expanded {
+    max-width: 1400px;
+    background: rgba(255, 79, 79, 0.15);
+}
+
+.outage-btn {
+    background: none;
+    border: none;
+    color: #ff4f4f;
+    cursor: pointer;
+    gap: 10px;
+}
+
+.outage-list {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px;
+    opacity: 0;
+    transform: translateX(-15px);
+    transition: all 0.3s ease;
+}
+
+.outage-drawer.expanded .outage-list {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.outage-item {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.outage-bubble {
+    position: absolute;
+    bottom: 12px; 
+    transform: translateX(-50%);
+    color: #ff4f4f;
+    font-size: 18px;
+    z-index: 10;
+    cursor: help;
+    pointer-events: auto;
+}
+
+.outage-bubble .outage-icon {
+    position: absolute;
+    color: white;
+    font-size: 9px;
+    font-weight: 900;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
 }

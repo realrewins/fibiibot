@@ -1714,5 +1714,37 @@
   {
     "timestamp": "2026-03-01 14:35:01",
     "followers": 958920
+  },
+  {
+    "timestamp": "2026-03-01 15:35:01",
+    "followers": 958918
+  },
+  {
+    "timestamp": "2026-03-01 16:35:01",
+    "followers": 958919
+  },
+  {
+    "timestamp": "2026-03-01 17:35:02",
+    "followers": 958908
+  },
+  {
+    "timestamp": "2026-03-01 18:35:02",
+    "followers": 958900
+  },
+  {
+    "timestamp": "2026-03-01 19:35:02",
+    "followers": 958900
+  },
+  {
+    "timestamp": "2026-03-01 20:35:03",
+    "followers": 958899
+  },
+  {
+    "timestamp": "2026-03-01 21:35:04",
+    "followers": 958896
+  },
+  {
+    "timestamp": "2026-03-01 22:35:04",
+    "followers": 958893
   }
 ]

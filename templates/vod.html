@@ -139,62 +139,107 @@
         </main>
     </div>
 
-    <!-- VOD Player Modal -->
     <div id="vodPlayerModal" class="modal vod-player-modal">
-        <div class="modal-content vod-modal-content">
-            <div class="modal-header">
-                <h3 id="vodModalTitle">Stream-Titel</h3>
-                <button class="modal-close" onclick="closeVodModal()"><i class="fas fa-times"></i></button>
-                <span class="game-badge" id="vodGameBadge">Unbekannt</span>
-            </div>
-            <div class="modal-body">
-                <div class="vod-player-container">
-                    <video id="vodVideo" controls></video>
-                </div>
-                <div class="vod-info">
-                    <div class="vod-meta">
-                        <span id="vodGame" class="game-badge"></span>
+        <div style="display: flex; gap: 20px; width: 95%; max-width: 1400px; align-items: stretch; justify-content: center;">
+            <div class="modal-content" style="width: 320px; padding: 1.5rem; flex-shrink: 0; display: flex; flex-direction: column; margin: 0;">
+                <div style="display: flex; flex-direction: column; gap: 18px; flex: 1;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+                        <h4 style="margin: 0; color: white; display: flex; align-items: center; gap: 10px; font-size: 1.15rem;">
+                            <i class="fas fa-cut" style="color: var(--accent);"></i> Clip Tool
+                        </h4>
                     </div>
-                    <!-- Clip-Bereich -->
-                    <div class="clip-creator">
-                        <div class="clip-input-row">
-                            <input type="text" id="clipStart" placeholder="Start (z.B. 1:23:45)" readonly>
-                            <button class="btn clip-set" onclick="setClipStart()"><i class="fas fa-play"></i> Set start</button>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                            <button class="btn" onclick="setClipStart()" style="flex: 1; padding: 12px 10px; font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-flag" style="margin-right: 5px;"></i> Set Start</button>
+                            <span id="clipStartDisplay" style="font-family: monospace; font-size: 1.2rem; color: var(--accent); width: 85px; text-align: right; font-weight: bold;">00:00:00</span>
                         </div>
-                        <div class="clip-input-row">
-                            <input type="text" id="clipEnd" placeholder="Ende" readonly>
-                            <button class="btn clip-set" onclick="setClipEnd()"><i class="fas fa-stop"></i> Set end</button>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                            <button class="btn" onclick="setClipEnd()" style="flex: 1; padding: 12px 10px; font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-flag-checkered" style="margin-right: 5px;"></i> Set End</button>
+                            <span id="clipEndDisplay" style="font-family: monospace; font-size: 1.2rem; color: var(--accent); width: 85px; text-align: right; font-weight: bold;">00:00:00</span>
                         </div>
-                        <div class="clip-input-row">
-                            <input type="text" id="clipName" placeholder="Clip-Name">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Clip Titel</label>
+                            <input type="text" id="clipTitleInput" placeholder="Mein epischer Clip" style="width: 100%; background: #1a1a24; border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 14px; border-radius: 8px; outline: none; font-size: 0.95rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
                         </div>
-                        <div class="clip-actions">
-                            <button class="btn clip-create" onclick="createClip()"><i class="fa-solid fa-rocket"></i> Create</button>
-                            <div class="clip-loading-bar" id="clipLoadingBar" style="display: none;">
-                                <div class="loading-progress"></div>
+                    </div>
+                    <div style="margin-top: auto;"></div>
+                    <button class="btn" id="createClipBtn" onclick="createClip()" style="padding: 14px; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold; font-size: 1rem; background: var(--accent); color: white; border: none; transition: 0.2s; box-shadow: 0 4px 15px rgba(145, 70, 255, 0.3);">
+                        <i class="fa-solid fa-rocket"></i> Create Clip
+                    </button>
+                    <div id="clipLoadingArea" style="max-height: 0; overflow: hidden; transition: max-height 0.4s ease, margin-top 0.4s ease; margin-top: 0;">
+                        <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; position: relative; overflow: hidden;">
+                            <div id="clipLoadingBar" style="height: 100%; width: 0%; background: var(--accent); position: absolute; top:0; left:0; transition: width 0.15s ease-out; box-shadow: 0 0 10px rgba(145, 70, 255, 0.6); overflow: hidden;">
+                                <div style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); animation: shimmer 1.5s infinite linear;"></div>
                             </div>
                         </div>
-                        <div class="clip-result" id="clipResult" style="display: none;">
-                            <button class="btn clip-download" onclick="downloadClip()"><i class="fas fa-download"></i> Download</button>
-                            <button class="btn clip-generate" onclick="generateClipLink()"><i class="fas fa-link"></i> Generate link</button>
-                            <span id="clipLink" style="display: none;"></span>
+                    </div>
+                </div>
+                <div id="clipResultArea" style="max-height: 0; overflow: hidden; transition: max-height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), margin-top 0.4s ease; margin-top: 0; display: flex; flex-direction: column; gap: 12px;">
+                    <div id="clipResultThumb" class="clip-thumbnail-wrapper">
+                        <img id="clipResultImg" src="" alt="Clip Thumbnail">
+                        <div class="clip-thumb-overlay">
+                            <i class="fas fa-external-link-alt"></i>
                         </div>
                     </div>
-                    <!-- Outage-Dropdown -->
-                    <div class="vod-outages">
-                        <div class="outages-header" onclick="toggleOutages()">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>Ausfälle anzeigen</span>
-                            <i class="fas fa-chevron-down" id="outagesChevron"></i>
+                    <div class="clip-link-row" onclick="copyGeneratedLink()">
+                        <span id="clipLinkSpan">fibiibot.com/vod/clips/...</span>
+                        <i class="fas fa-copy"></i>
+                    </div>
+                    <button class="btn btn-full-width" onclick="downloadGeneratedClip()" id="modalDownloadBtn">
+                        <i class="fas fa-download"></i> Herunterladen
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-content vod-modal-content" style="flex: 1; padding: 1.5rem; display: flex; flex-direction: column; min-width: 0; margin: 0;">
+                <div class="modal-header" style="border-radius: 0; padding: 0 0 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+                    <h3 id="vodModalTitle" style="font-size: 1.2rem;">Stream-Titel</h3>
+                    <button class="modal-close" onclick="closeVodModal()" style="width: 32px; height: 32px; font-size: 1rem;"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body" style="padding: 0; display: flex; flex-direction: column;">
+                    <div class="vod-player-container custom-player" id="videoContainer" style="width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.8);">
+                        <video id="vodVideo" style="width: 100%; height: 100%; outline: none;"></video>
+                        <div class="big-play-overlay" id="bigPlayBtn">
+                            <i class="fas fa-play"></i>
                         </div>
-                        <div class="outages-list" id="outagesList" style="display: none;"></div>
+                        <div class="player-controls" id="playerControls">
+                            <div class="progress-bar-container" id="progressContainer">
+                                <div class="progress-bar-bg"></div>
+                                <div class="progress-bar" id="progressBar"></div>
+                                <div class="progress-dot" id="progressDot"></div>
+                            </div>
+                            <div class="controls-row">
+                                <button class="control-btn" id="playPauseBtn"><i class="fas fa-play"></i></button>
+                                <div class="time-display" id="timeDisplay">00:00:00 / 00:00:00</div>
+                                <button class="control-btn" id="muteBtn"><i class="fas fa-volume-up"></i></button>
+                                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1">
+                                <div class="spacer"></div>
+                                <button class="control-btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="vod-info" style="margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                <i class="fas fa-gamepad" style="margin-right: 10px; color: var(--accent); font-size: 1rem;"></i>
+                                <span id="vodGameBadge" style="font-weight: 600; font-size: 0.95rem;">Unbekannt</span>
+                            </div>
+
+                            <div id="outageDrawer" class="outage-drawer">
+                                <button id="outageToggle" class="outage-btn">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span id="outageCount">0</span> Ausfälle
+                                </button>
+                                <div id="outageList" class="outage-list"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bug Report Modal (unverändert) -->
     <div id="bugReportModal" class="modal" style="display:none;">
         <div class="bug-modal-content" onclick="event.stopPropagation()">
             <div class="bug-modal-header">
@@ -210,8 +255,7 @@
                     </div>
                     <div class="form-group">
                         <label for="bugDescription">Beschreibung</label>
-                        <textarea id="bugDescription" rows="5" placeholder="Was ist passiert? Wie können wir es fixen?"
-                            required></textarea>
+                        <textarea id="bugDescription" rows="5" placeholder="Was ist passiert? Wie können wir es fixen?" required></textarea>
                     </div>
                 </form>
             </div>

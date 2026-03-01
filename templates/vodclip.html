@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibii Bot · Clip</title>
+    <link rel="stylesheet" href="/static/design/vod/css/vodclip.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        window.CLIP_ID = "{{ clip_id }}";
+    </script>
+</head>
+<body>
+    <div class="clip-page-container">
+
+        <div id="errorBox" class="error-box" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Clip konnte nicht geladen werden oder existiert nicht.</span>
+            <button class="btn" onclick="window.location.href='/vod'">Zurück zur Übersicht</button>
+        </div>
+
+        <div id="clipContainer" class="clip-container" style="display: none;">
+            <div class="clip-header">
+                <h1 id="clipTitle"></h1>
+                <div class="clip-meta">
+                    <span id="clipCreator"></span>
+                    <span id="clipDate"></span>
+                </div>
+            </div>
+
+            <div class="video-wrapper custom-player" id="videoContainer">
+                <video id="clipVideo"></video>
+                
+                <div class="big-play-overlay" id="bigPlayBtn">
+                    <i class="fas fa-play"></i>
+                </div>
+
+                <div class="player-controls" id="playerControls">
+                    <div class="progress-bar-container" id="progressContainer">
+                        <div class="progress-bar-bg"></div>
+                        <div class="progress-bar" id="progressBar"></div>
+                        <div class="progress-dot" id="progressDot"></div>
+                    </div>
+                    <div class="controls-row">
+                        <button class="control-btn" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+                        <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+                        <button class="control-btn" id="muteBtn"><i class="fas fa-volume-up"></i></button>
+                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1">
+                        <div class="spacer"></div>
+                        <button class="control-btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clip-footer">
+                <button class="btn" onclick="downloadClipSegment()" id="downloadClipBtn">
+                    <i class="fas fa-download"></i> Herunterladen
+                </button>
+                <button class="btn" onclick="copyClipLink()">
+                    <i class="fas fa-copy"></i> Link kopieren
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='/vod'">
+                    <i class="fas fa-arrow-left"></i> Zurück zu VODs
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="/static/design/vod/js/vodclip.js"></script>
+</body>
+</html>

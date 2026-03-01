@@ -1,6 +1,3 @@
-"""
-Seiten-Routen (Hauptseiten)
-"""
 from flask import Blueprint, render_template, session, redirect, url_for, send_file, jsonify
 from app.decorators import login_required, role_required
 from app.auth import generate_csrf_token
@@ -71,19 +68,22 @@ def bot_page():
 def vod_page():
     return render_template('vod.html', csrf_token=generate_csrf_token(), user=session['user'], current_page='vod')
 
-# ========== Download Routes ==========
+@main_bp.route('/vod/clips/<clip_id>')
+def view_clip(clip_id):
+    try:
+        return render_template('vodclip.html', clip_id=clip_id)
+    except Exception:
+        return "Template vodclip.html nicht gefunden.", 500
+
 @main_bp.route('/download/<filename>')
 @login_required
 def download_file(filename):
-    """Dateien von /static/downloads/ herunterladen"""
     try:
-        # Nur erlaubte Dateien
         allowed_files = ['session__settings']
         
         if filename not in allowed_files:
             return jsonify({'error': 'File not allowed'}), 403
         
-        # Pfad konstruieren
         file_path = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'downloads', filename)
         file_path = os.path.abspath(file_path)
         

@@ -1,0 +1,56 @@
+{
+  "documents": [
+    {
+      "id": "WzTWkpmVOjmj6gFL7ipD",
+      "fields": {
+        "winner": {
+          "stringValue": ""
+        },
+        "used": {
+          "booleanValue": true
+        },
+        "pin": {
+          "stringValue": "Test1234"
+        },
+        "timestamp": {
+          "stringValue": "2026-02-06T16:29:15.706Z"
+        },
+        "type": {
+          "stringValue": "Dominos 20€"
+        },
+        "code": {
+          "stringValue": "Test123"
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "views": {
+          "integerValue": "0"
+        }
+      }
+    },
+    {
+      "id": "20260215222435511807",
+      "fields": {
+        "type": {
+          "stringValue": "Dominos 50€"
+        },
+        "code": {
+          "stringValue": "Test123"
+        },
+        "pin": {
+          "stringValue": "123456"
+        },
+        "winner": {
+          "stringValue": ""
+        },
+        "used": {
+          "booleanValue": false
+        },
+        "timestamp": {
+          "stringValue": "2026-02-15T22:24:35.511823"
+        }
+      }
+    }
+  ]
+}

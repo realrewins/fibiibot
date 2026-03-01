@@ -1,0 +1,44 @@
+{
+  "documents": [
+    {
+      "id": "realrewins",
+      "fields": {
+        "username": {
+          "stringValue": "realrewins"
+        },
+        "roles": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "dev"
+              }
+            ]
+          }
+        },
+        "display_name": {
+          "stringValue": "realRewins"
+        }
+      }
+    },
+    {
+      "id": "xqirby",
+      "fields": {
+        "username": {
+          "stringValue": "xqirby"
+        },
+        "roles": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "admin"
+              }
+            ]
+          }
+        },
+        "display_name": {
+          "stringValue": "xqirby"
+        }
+      }
+    }
+  ]
+}

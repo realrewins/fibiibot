@@ -1,0 +1,274 @@
+[
+  {
+    "id": "316470254950",
+    "timestamp": "2026-02-22T12:27:09Z",
+    "watched": 168445,
+    "viewers": 868,
+    "followers": 91,
+    "uptime": 11641
+  },
+  {
+    "id": "316460072678",
+    "timestamp": "2026-02-21T16:58:14Z",
+    "watched": 65701,
+    "viewers": 1093,
+    "followers": 31,
+    "uptime": 3609
+  },
+  {
+    "id": "316459104486",
+    "timestamp": "2026-02-21T15:43:39Z",
+    "watched": 65863,
+    "viewers": 890,
+    "followers": 44,
+    "uptime": 4438
+  },
+  {
+    "id": "316217575911",
+    "timestamp": "2026-02-20T17:19:56Z",
+    "watched": 286781,
+    "viewers": 875,
+    "followers": 179,
+    "uptime": 19661
+  },
+  {
+    "id": "316203565671",
+    "timestamp": "2026-02-19T13:11:38Z",
+    "watched": 296606,
+    "viewers": 793,
+    "followers": 120,
+    "uptime": 22434
+  },
+  {
+    "id": "316183608935",
+    "timestamp": "2026-02-17T15:50:40Z",
+    "watched": 85629,
+    "viewers": 807,
+    "followers": 56,
+    "uptime": 6362
+  },
+  {
+    "id": "stream_014",
+    "timestamp": "2025-02-12T19:30:00Z",
+    "watched": 34020,
+    "viewers": 554,
+    "followers": 9,
+    "uptime": 3660
+  },
+  {
+    "id": "stream_013",
+    "timestamp": "2025-02-11T18:15:00Z",
+    "watched": 450000,
+    "viewers": 1600,
+    "followers": 233,
+    "uptime": 17040
+  },
+  {
+    "id": "stream_012",
+    "timestamp": "2025-02-10T20:45:00Z",
+    "watched": 372000,
+    "viewers": 1100,
+    "followers": 55,
+    "uptime": 20640
+  },
+  {
+    "id": "stream_011",
+    "timestamp": "2025-02-08T19:00:00Z",
+    "watched": 312000,
+    "viewers": 1200,
+    "followers": 35,
+    "uptime": 15120
+  },
+  {
+    "id": "stream_010",
+    "timestamp": "2025-02-07T17:30:00Z",
+    "watched": 540000,
+    "viewers": 1100,
+    "followers": 168,
+    "uptime": 19740
+  },
+  {
+    "id": "stream_009",
+    "timestamp": "2025-02-06T20:30:00Z",
+    "watched": 600000,
+    "viewers": 2000,
+    "followers": 163,
+    "uptime": 17820
+  },
+  {
+    "id": "stream_008",
+    "timestamp": "2025-02-05T18:00:00Z",
+    "watched": 876000,
+    "viewers": 1500,
+    "followers": 199,
+    "uptime": 34020
+  },
+  {
+    "id": "stream_007",
+    "timestamp": "2025-02-04T19:45:00Z",
+    "watched": 426000,
+    "viewers": 922,
+    "followers": 231,
+    "uptime": 22440
+  },
+  {
+    "id": "stream_006",
+    "timestamp": "2025-02-02T20:15:00Z",
+    "watched": 174000,
+    "viewers": 809,
+    "followers": 103,
+    "uptime": 12960
+  },
+  {
+    "id": "stream_005",
+    "timestamp": "2025-02-01T18:30:00Z",
+    "watched": 594000,
+    "viewers": 1800,
+    "followers": 308,
+    "uptime": 16260
+  },
+  {
+    "id": "stream_004",
+    "timestamp": "2025-01-30T17:00:00Z",
+    "watched": 654000,
+    "viewers": 1200,
+    "followers": 253,
+    "uptime": 33300
+  },
+  {
+    "id": "stream_003",
+    "timestamp": "2025-01-29T20:00:00Z",
+    "watched": 420000,
+    "viewers": 749,
+    "followers": 254,
+    "uptime": 33600
+  },
+  {
+    "id": "stream_002",
+    "timestamp": "2025-01-28T19:00:00Z",
+    "watched": 204000,
+    "viewers": 984,
+    "followers": 72,
+    "uptime": 12300
+  },
+  {
+    "id": "stream_001",
+    "timestamp": "2025-01-27T18:00:00Z",
+    "watched": 354000,
+    "viewers": 980,
+    "followers": 115,
+    "uptime": 21540
+  },
+  {
+    "id": "stream_028",
+    "timestamp": "2025-01-14T19:30:00Z",
+    "watched": 430000,
+    "viewers": 1550,
+    "followers": 115,
+    "uptime": 15600
+  },
+  {
+    "id": "stream_027",
+    "timestamp": "2025-01-13T18:15:00Z",
+    "watched": 348000,
+    "viewers": 1300,
+    "followers": 88,
+    "uptime": 13200
+  },
+  {
+    "id": "stream_026",
+    "timestamp": "2025-01-12T20:45:00Z",
+    "watched": 512000,
+    "viewers": 1700,
+    "followers": 135,
+    "uptime": 18000
+  },
+  {
+    "id": "stream_025",
+    "timestamp": "2025-01-11T19:00:00Z",
+    "watched": 389000,
+    "viewers": 1420,
+    "followers": 102,
+    "uptime": 14400
+  },
+  {
+    "id": "stream_024",
+    "timestamp": "2025-01-10T17:30:00Z",
+    "watched": 450000,
+    "viewers": 1600,
+    "followers": 118,
+    "uptime": 16200
+  },
+  {
+    "id": "stream_023",
+    "timestamp": "2025-01-09T20:30:00Z",
+    "watched": 325000,
+    "viewers": 1250,
+    "followers": 85,
+    "uptime": 12600
+  },
+  {
+    "id": "stream_022",
+    "timestamp": "2025-01-08T18:00:00Z",
+    "watched": 532000,
+    "viewers": 1750,
+    "followers": 142,
+    "uptime": 18000
+  },
+  {
+    "id": "stream_021",
+    "timestamp": "2025-01-07T19:45:00Z",
+    "watched": 278000,
+    "viewers": 1150,
+    "followers": 72,
+    "uptime": 11400
+  },
+  {
+    "id": "stream_020",
+    "timestamp": "2025-01-06T20:15:00Z",
+    "watched": 405000,
+    "viewers": 1480,
+    "followers": 105,
+    "uptime": 15000
+  },
+  {
+    "id": "stream_019",
+    "timestamp": "2025-01-05T18:30:00Z",
+    "watched": 362000,
+    "viewers": 1340,
+    "followers": 92,
+    "uptime": 13800
+  },
+  {
+    "id": "stream_018",
+    "timestamp": "2025-01-04T17:00:00Z",
+    "watched": 587000,
+    "viewers": 1820,
+    "followers": 148,
+    "uptime": 19500
+  },
+  {
+    "id": "stream_017",
+    "timestamp": "2025-01-03T20:00:00Z",
+    "watched": 412000,
+    "viewers": 1520,
+    "followers": 110,
+    "uptime": 15000
+  },
+  {
+    "id": "stream_016",
+    "timestamp": "2025-01-02T19:00:00Z",
+    "watched": 498000,
+    "viewers": 1650,
+    "followers": 130,
+    "uptime": 16800
+  },
+  {
+    "id": "stream_015",
+    "timestamp": "2025-01-01T18:00:00Z",
+    "watched": 30500,
+    "viewers": 390,
+    "followers": 8,
+    "uptime": 2100
+  }
+]

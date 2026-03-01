@@ -1,0 +1,53 @@
+[
+  {
+    "timestamp": "2026-02-15T21:02:01.306547+00:00",
+    "from_user": "realrewins",
+    "message": "Guten Tag Mod-Team und Fibi,\nich habe die Website einmal komplett redesigned, aber die Kernfunktionen behalten.\n\nSachen die jedoch added wurden sind:\n- 4 Statistiken auf dem Dashboard Über Fibii's letzte 14 Streams\n- Bug Report System (rechts oben)\n- Benachrichtigungen\n- Filter System (wird noch ausführlicher gemacht)\n- Automatische Clip Aufruf Abgleichung alle 5 Minuten\n- Automatisches ausfüllen von Clip Daten nach einfügen des Links (Titel, Datum, ...)\n- Automatisches ausfüllen des Follow-Datums in Blacklist \n\nFür Admins/Fibii:\n- Ausführliche Bug Report empfang und Bearbeitungspage\n- Audit-Log (Discord ähnlich)\n- Rollenverteilung Rework\n- Benachrichtigungs sende Panel\n\nNicht relevant für Whitelisted User:\n- Verbesserte Sicherheit\nBei Verbesserungsvorschlägen oder Bugs nutzt gerne das neue Bug Report Tool.\nAuf dem Dashboard ist unten auch eine Vorlage wie ich euch bitte Verbesserungen zu verfassen damit ich sie von Bugs unterscheiden kann.\nIch hoffe euch gefällt die neue Website und dass ihr noch einen schönen Tag habt,\nrewins",
+    "type": "system",
+    "target_users": [
+      "fabi391",
+      "fibii",
+      "harass_",
+      "lenaxrs",
+      "realrewins",
+      "shiquno",
+      "shun_kazuya",
+      "thunoorr",
+      "tida99",
+      "trillionerr",
+      "zxmiaa",
+      "xqirby",
+      "thisisjonass"
+    ],
+    "target_roles": [],
+    "read_by": {
+      "fabi391": false,
+      "fibii": false,
+      "harass_": true,
+      "lenaxrs": false,
+      "realrewins": true,
+      "shiquno": false,
+      "shun_kazuya": false,
+      "thunoorr": false,
+      "tida99": false,
+      "trillionerr": false,
+      "zxmiaa": false,
+      "xqirby": true,
+      "thisisjonass": true
+    }
+  },
+  {
+    "timestamp": "2026-02-15T23:17:44.097698+00:00",
+    "from_user": "xqirby",
+    "message": "hat funktioniert",
+    "type": "system",
+    "bug_id": "20260215231713387089",
+    "target_users": [
+      "xqirby"
+    ],
+    "target_roles": [],
+    "read_by": {
+      "xqirby": true
+    }
+  }
+]

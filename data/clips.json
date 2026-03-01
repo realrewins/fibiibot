@@ -1,0 +1,883 @@
+{
+  "documents": [
+    {
+      "id": "20260209194231786907",
+      "fields": {
+        "slug": {
+          "stringValue": "EasyRelievedHedgehogMoreCowbell-TBjNp1lgF7LQcwLi"
+        },
+        "name": {
+          "stringValue": "JBL CTA 15.04.25"
+        },
+        "dateAttr": {
+          "stringValue": "2025-04-15"
+        },
+        "dateDisplay": {
+          "stringValue": "15.4.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/EasyRelievedHedgehogMoreCowbell-TBjNp1lgF7LQcwLi/4723178f-3384-4050-a5fd-2f013844cb5a/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "64"
+        },
+        "timestamp": {
+          "stringValue": "2025-04-15T14:30:15Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786918",
+      "fields": {
+        "slug": {
+          "stringValue": "SmoggyWonderfulPhoneKappa-uGxyMsHTBlanWwAl"
+        },
+        "name": {
+          "stringValue": "!jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2025-05-12"
+        },
+        "dateDisplay": {
+          "stringValue": "12.5.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/PfvrvrhscjLB0wZWp1sAJQ/320094776057-offset-1836-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "260"
+        },
+        "timestamp": {
+          "stringValue": "2025-05-12T16:45:22Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786923",
+      "fields": {
+        "slug": {
+          "stringValue": "ProductiveSarcasticLobsterTheRinger-UzjhTYa0b3f2mcEv"
+        },
+        "name": {
+          "stringValue": "More Sour Cream Chips 05.02.2026"
+        },
+        "dateAttr": {
+          "stringValue": "2026-02-05"
+        },
+        "dateDisplay": {
+          "stringValue": "5.2.2026"
+        },
+        "partner": {
+          "stringValue": "more"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/ProductiveSarcasticLobsterTheRinger-UzjhTYa0b3f2mcEv/15df2636-d472-4558-8069-52cc79680334/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "56"
+        },
+        "timestamp": {
+          "stringValue": "2026-02-05T18:20:33Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786925",
+      "fields": {
+        "slug": {
+          "stringValue": "SpicyHelpfulLasagnaChefFrank-mTsl5C_zk5QbQJEB"
+        },
+        "name": {
+          "stringValue": "JBL"
+        },
+        "dateAttr": {
+          "stringValue": "2025-09-14"
+        },
+        "dateDisplay": {
+          "stringValue": "14.9.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/Qztp0Zk7JeQv85OUG0CRAQ/314873034342-offset-1308-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "1176"
+        },
+        "timestamp": {
+          "stringValue": "2025-09-14T20:15:47Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786928",
+      "fields": {
+        "slug": {
+          "stringValue": "ExcitedGiftedTroutShazBotstix-32CNasQ4Zg_vC4NC"
+        },
+        "name": {
+          "stringValue": "das Neue Trolli Schild"
+        },
+        "dateAttr": {
+          "stringValue": "2025-02-09"
+        },
+        "dateDisplay": {
+          "stringValue": "9.2.2025"
+        },
+        "partner": {
+          "stringValue": "kein"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/ExcitedGiftedTroutShazBotstix-32CNasQ4Zg_vC4NC/d1b8d305-0840-4dfc-a79e-1c44b5574454/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "110"
+        },
+        "timestamp": {
+          "stringValue": "2025-02-09T19:30:12Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786931",
+      "fields": {
+        "slug": {
+          "stringValue": "HyperSlickLasagnaCclamChamp-_Wxtd6AIz8tNjRcf"
+        },
+        "name": {
+          "stringValue": "JBL mit besten Noise Canceling #Werbung"
+        },
+        "dateAttr": {
+          "stringValue": "2025-06-18"
+        },
+        "dateDisplay": {
+          "stringValue": "18.6.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/HyperSlickLasagnaCclamChamp-_Wxtd6AIz8tNjRcf/1409185e-5804-44ac-9407-93099643012a/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "199"
+        },
+        "timestamp": {
+          "stringValue": "2025-06-18T17:40:28Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786934",
+      "fields": {
+        "slug": {
+          "stringValue": "ProtectiveHumbleSaladOSkomodo-mEhHyFVrnmzv6laW"
+        },
+        "name": {
+          "stringValue": "JBL besten Wireless Kopfhörer"
+        },
+        "dateAttr": {
+          "stringValue": "2025-07-27"
+        },
+        "dateDisplay": {
+          "stringValue": "27.7.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/ProtectiveHumbleSaladOSkomodo-mEhHyFVrnmzv6laW/3ef89e5d-9317-41e7-9c1c-52565bb3f00a/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "148"
+        },
+        "timestamp": {
+          "stringValue": "2025-07-27T15:25:19Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786937",
+      "fields": {
+        "slug": {
+          "stringValue": "PeacefulTubularManateePeanutButterJellyTime-2TBIEdUD8NIOOXPD"
+        },
+        "name": {
+          "stringValue": "!jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2025-03-23"
+        },
+        "dateDisplay": {
+          "stringValue": "23.3.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/85-mt9kwSBHVA_DSDjlzww/AT-cm%7C85-mt9kwSBHVA_DSDjlzww-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "1556"
+        },
+        "timestamp": {
+          "stringValue": "2025-03-23T13:50:41Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786940",
+      "fields": {
+        "slug": {
+          "stringValue": "ViscousShinyCroissantBlargNaut-HyZaB_8M_uc0m5SF"
+        },
+        "name": {
+          "stringValue": "JBL"
+        },
+        "dateAttr": {
+          "stringValue": "2025-09-19"
+        },
+        "dateDisplay": {
+          "stringValue": "19.9.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/BAdtXh8mWgf_DP7nNJuUhQ/314634576103-offset-536-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "152"
+        },
+        "timestamp": {
+          "stringValue": "2025-09-19T16:35:07Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786943",
+      "fields": {
+        "slug": {
+          "stringValue": "LitigiousDoubtfulZucchiniAllenHuhu-07Pj6ojiO7sufEsM"
+        },
+        "name": {
+          "stringValue": "!jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2025-04-27"
+        },
+        "dateDisplay": {
+          "stringValue": "27.4.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/RQd5kdOz4-qI4ju7LnxLDA/319362804345-offset-996-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "65"
+        },
+        "timestamp": {
+          "stringValue": "2025-04-27T18:10:54Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786946",
+      "fields": {
+        "slug": {
+          "stringValue": "BadCooperativeBatOSkomodo-LPTSMQDmD-pTfI2c"
+        },
+        "name": {
+          "stringValue": "!jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2025-02-09"
+        },
+        "dateDisplay": {
+          "stringValue": "9.2.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/_PjWsSz00jEA5g_qU3yNnA/AT-cm%7C_PjWsSz00jEA5g_qU3yNnA-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "115"
+        },
+        "timestamp": {
+          "stringValue": "2025-02-09T21:15:33Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786949",
+      "fields": {
+        "slug": {
+          "stringValue": "BenevolentAbnegateGarageWholeWheat-rGaulIkBo_tCbrqc"
+        },
+        "name": {
+          "stringValue": "jbl 25-11"
+        },
+        "dateAttr": {
+          "stringValue": "2025-11-23"
+        },
+        "dateDisplay": {
+          "stringValue": "23.11.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/BenevolentAbnegateGarageWholeWheat-rGaulIkBo_tCbrqc/5c1e3d4e-48eb-4c5b-8dfd-a8527d52b90e/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "88"
+        },
+        "timestamp": {
+          "stringValue": "2025-11-23T14:20:16Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786951",
+      "fields": {
+        "slug": {
+          "stringValue": "PopularCallousHyenaRuleFive-s73BnUJd4bpHYXey"
+        },
+        "name": {
+          "stringValue": "Die sauersten Gummibärchen von Trolli"
+        },
+        "dateAttr": {
+          "stringValue": "2025-02-09"
+        },
+        "dateDisplay": {
+          "stringValue": "9.2.2025"
+        },
+        "partner": {
+          "stringValue": "kein"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/PopularCallousHyenaRuleFive-s73BnUJd4bpHYXey/d0401556-573b-403d-8ea1-a3e850fe0460/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "155"
+        },
+        "timestamp": {
+          "stringValue": "2025-02-09T19:45:29Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786954",
+      "fields": {
+        "slug": {
+          "stringValue": "ChillyGiantAirGuitarSuperVinlin-s-le_F9qJsaJHbm5"
+        },
+        "name": {
+          "stringValue": "Aoste High Protein Salami Sticks 16.01.2026"
+        },
+        "dateAttr": {
+          "stringValue": "2026-01-16"
+        },
+        "dateDisplay": {
+          "stringValue": "16.1.2026"
+        },
+        "partner": {
+          "stringValue": "aoste"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/ChillyGiantAirGuitarSuperVinlin-s-le_F9qJsaJHbm5/97d7272e-8ff3-4df2-b02f-d307a6f2ccf9/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "299"
+        },
+        "timestamp": {
+          "stringValue": "2026-01-16T17:50:22Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786957",
+      "fields": {
+        "slug": {
+          "stringValue": "AntediluvianSteamyHabaneroTwitchRaid-o8JJZqSC07WB1Y5m"
+        },
+        "name": {
+          "stringValue": "JBL"
+        },
+        "dateAttr": {
+          "stringValue": "2025-08-28"
+        },
+        "dateDisplay": {
+          "stringValue": "28.8.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/eNw51KPCSWakgtO1gdWOZg/324844720249-offset-23746-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "64"
+        },
+        "timestamp": {
+          "stringValue": "2025-08-28T15:40:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786960",
+      "fields": {
+        "slug": {
+          "stringValue": "VibrantMoralBeanBibleThump-dBlnebfobY44O4VA"
+        },
+        "name": {
+          "stringValue": "JBL"
+        },
+        "dateAttr": {
+          "stringValue": "2025-09-30"
+        },
+        "dateDisplay": {
+          "stringValue": "30.9.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/ZeAZRXQZZ3m36G2OODuFQA/315029291366-offset-11056-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "104"
+        },
+        "timestamp": {
+          "stringValue": "2025-09-30T19:25:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786963",
+      "fields": {
+        "slug": {
+          "stringValue": "SuperKitschyOxCharlietheUnicorn-IL2lu5D87QYmAnBr"
+        },
+        "name": {
+          "stringValue": "Dein Sommer - Dein JBL!"
+        },
+        "dateAttr": {
+          "stringValue": "2025-07-21"
+        },
+        "dateDisplay": {
+          "stringValue": "21.7.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/SuperKitschyOxCharlietheUnicorn-IL2lu5D87QYmAnBr/671cf05a-138e-4c5a-bb7c-5a7baed8047c/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "422"
+        },
+        "timestamp": {
+          "stringValue": "2025-07-21T16:10:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786966",
+      "fields": {
+        "slug": {
+          "stringValue": "TransparentAssiduousWolverineStrawBeary-ILK3YWKWBdnGZGrc"
+        },
+        "name": {
+          "stringValue": "!jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2025-03-22"
+        },
+        "dateDisplay": {
+          "stringValue": "22.3.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/TransparentAssiduousWolverineStrawBeary-ILK3YWKWBdnGZGrc/196a9cb7-ae94-4775-922d-606571a4d28c/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "271"
+        },
+        "timestamp": {
+          "stringValue": "2025-03-22T14:55:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786969",
+      "fields": {
+        "slug": {
+          "stringValue": "BoredTenderMeerkatKappaClaus-GE2eEtUYDGKAukQI"
+        },
+        "name": {
+          "stringValue": "!jbl 25.01.25"
+        },
+        "dateAttr": {
+          "stringValue": "2025-01-25"
+        },
+        "dateDisplay": {
+          "stringValue": "25.1.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/BoredTenderMeerkatKappaClaus-GE2eEtUYDGKAukQI/c28dc9d9-c139-4083-8576-091a1ea74b02/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "291"
+        },
+        "timestamp": {
+          "stringValue": "2025-01-25T20:05:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786972",
+      "fields": {
+        "slug": {
+          "stringValue": "ComfortableMoralCurlewNomNom-ttM24N0PmSnNaCox"
+        },
+        "name": {
+          "stringValue": "JBL"
+        },
+        "dateAttr": {
+          "stringValue": "2025-09-02"
+        },
+        "dateDisplay": {
+          "stringValue": "2.9.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/vPiWNLbTNuDdD5kpzWgqMQ/324929409785-offset-5716-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "613"
+        },
+        "timestamp": {
+          "stringValue": "2025-09-02T18:30:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786977",
+      "fields": {
+        "slug": {
+          "stringValue": "GloriousEntertainingBibimbapANELE-tmuYbR0KgRpjbwvF"
+        },
+        "name": {
+          "stringValue": "JBL bestes Headset"
+        },
+        "dateAttr": {
+          "stringValue": "2025-03-11"
+        },
+        "dateDisplay": {
+          "stringValue": "11.3.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/GloriousEntertainingBibimbapANELE-tmuYbR0KgRpjbwvF/6fcdf82e-fd7b-4e3a-b010-ce5be8ccf778/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "88"
+        },
+        "timestamp": {
+          "stringValue": "2025-03-11T17:15:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786980",
+      "fields": {
+        "slug": {
+          "stringValue": "WimpySpineyTermiteFrankerZ-alZjhxldAfXhA9Ry"
+        },
+        "name": {
+          "stringValue": "JBL Quantum 910P Wireless #Werbung"
+        },
+        "dateAttr": {
+          "stringValue": "2025-12-06"
+        },
+        "dateDisplay": {
+          "stringValue": "6.12.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/WimpySpineyTermiteFrankerZ-alZjhxldAfXhA9Ry/277fe090-9f47-448b-bbf0-a949b661c059/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "106"
+        },
+        "timestamp": {
+          "stringValue": "2025-12-06T15:55:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786983",
+      "fields": {
+        "slug": {
+          "stringValue": "EnchantingNurturingLorisMingLee-XSNltRBZ4eS2obUl"
+        },
+        "name": {
+          "stringValue": "JBL 13.02"
+        },
+        "dateAttr": {
+          "stringValue": "2025-02-13"
+        },
+        "dateDisplay": {
+          "stringValue": "13.2.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/EnchantingNurturingLorisMingLee-XSNltRBZ4eS2obUl/dd53fdee-4c46-44de-96db-8d45f012ee1a/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "131"
+        },
+        "timestamp": {
+          "stringValue": "2025-02-13T19:20:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786986",
+      "fields": {
+        "slug": {
+          "stringValue": "HumbleSmoggyConsoleCeilingCat-j0rvfo8hKmJG6ZjN"
+        },
+        "name": {
+          "stringValue": "!jbl 29.03"
+        },
+        "dateAttr": {
+          "stringValue": "2025-03-29"
+        },
+        "dateDisplay": {
+          "stringValue": "29.3.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/rjY4349K736PISpiRumYzQ/AT-cm%7CrjY4349K736PISpiRumYzQ-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "1749"
+        },
+        "timestamp": {
+          "stringValue": "2025-03-29T16:40:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786988",
+      "fields": {
+        "slug": {
+          "stringValue": "TriumphantPlayfulVultureHoneyBadger-5k35GiLOsrMK1iMT"
+        },
+        "name": {
+          "stringValue": "JBL bester Partner"
+        },
+        "dateAttr": {
+          "stringValue": "2025-03-20"
+        },
+        "dateDisplay": {
+          "stringValue": "20.3.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/TriumphantPlayfulVultureHoneyBadger-5k35GiLOsrMK1iMT/53d4273f-fcf6-4867-b5ba-9e41d4c54ef7/preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "128"
+        },
+        "timestamp": {
+          "stringValue": "2025-03-20T15:10:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786991",
+      "fields": {
+        "slug": {
+          "stringValue": "GrossSillyDeerHumbleLife-TzfJU2XlepJVhpHY"
+        },
+        "name": {
+          "stringValue": "!jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2025-04-30"
+        },
+        "dateDisplay": {
+          "stringValue": "30.4.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/BtdyHE83yVNl5XqSVYaR2A/319505781241-offset-4258-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "679"
+        },
+        "timestamp": {
+          "stringValue": "2025-04-30T18:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260209194231786994",
+      "fields": {
+        "slug": {
+          "stringValue": "SmallAnimatedCocoaAMPEnergyCherry-NzFfs7vMZ7ZC76W2"
+        },
+        "name": {
+          "stringValue": "JBL Headset"
+        },
+        "dateAttr": {
+          "stringValue": "2025-07-16"
+        },
+        "dateDisplay": {
+          "stringValue": "16.7.2025"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips/JVDuVjcxX7O7zGe2Qu-ltg/323262343929-offset-2878-preview-480x272.jpg"
+        },
+        "views": {
+          "integerValue": "487"
+        },
+        "timestamp": {
+          "stringValue": "2025-07-16T14:30:00Z"
+        }
+      }
+    },
+    {
+      "id": "20260220075002763698",
+      "fields": {
+        "slug": {
+          "stringValue": "ColorfulPleasantBarracudaPrimeMe-XmiUaL_D51alzWF3"
+        },
+        "name": {
+          "stringValue": "JBL CTA 19.02.2026"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2026-02-19"
+        },
+        "dateDisplay": {
+          "stringValue": "19.02.2026"
+        },
+        "views": {
+          "integerValue": "74"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/ColorfulPleasantBarracudaPrimeMe-XmiUaL_D51alzWF3/6b24155f-d1d4-4aad-b95b-1340ac708e04/preview-480x272.jpg"
+        },
+        "timestamp": {
+          "stringValue": "2026-02-19T19:22:28Z"
+        },
+        "badge": {
+          "stringValue": "badge-jbl"
+        }
+      }
+    },
+    {
+      "id": "20260220212116130890",
+      "fields": {
+        "slug": {
+          "stringValue": "TiredAbstemiousSkirretOneHand-UHhIH5k-_wG8MwvU"
+        },
+        "name": {
+          "stringValue": "Beste Kombo, Eiswasser mit More Zerup 20.02.2026 #Werbung"
+        },
+        "partner": {
+          "stringValue": "more"
+        },
+        "dateAttr": {
+          "stringValue": "2026-02-20"
+        },
+        "dateDisplay": {
+          "stringValue": "20.02.2026"
+        },
+        "views": {
+          "integerValue": "18"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/TiredAbstemiousSkirretOneHand-UHhIH5k-_wG8MwvU/9212dd82-231b-4ae9-84cf-ea9b84881b4b/preview-480x272.jpg"
+        },
+        "timestamp": {
+          "stringValue": "2026-02-20T21:17:30Z"
+        },
+        "badge": {
+          "stringValue": "badge-more"
+        }
+      }
+    },
+    {
+      "id": "20260220212137581397",
+      "fields": {
+        "slug": {
+          "stringValue": "GoldenCredulousPepperDatBoi-PgXezv-xbqfv9vbm"
+        },
+        "name": {
+          "stringValue": "JBL InEar Kopfhörer 20.02.2026 #Werbung"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2026-02-20"
+        },
+        "dateDisplay": {
+          "stringValue": "20.02.2026"
+        },
+        "views": {
+          "integerValue": "10"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-clips-thumbnails-prod/GoldenCredulousPepperDatBoi-PgXezv-xbqfv9vbm/0c102746-039c-4f27-ade2-504f9cfa87b7/preview-480x272.jpg"
+        },
+        "timestamp": {
+          "stringValue": "2026-02-20T20:09:27Z"
+        },
+        "badge": {
+          "stringValue": "badge-jbl"
+        }
+      }
+    }
+  ]
+}

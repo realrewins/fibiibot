@@ -30,23 +30,46 @@ def cleanup_old_clips():
     except Exception:
         pass
 
-def render_clip_background(clip_dir, start, duration, input_video):
+def get_input_video(stream_dir):
+    checks = [
+        ('playlist.m3u8', 'hls'),
+        ('index.m3u8', 'hls'),
+        ('video/playlist.m3u8', 'hls'),
+        ('video/index.m3u8', 'hls'),
+        (f'{os.path.basename(stream_dir)}.mp4', 'mp4'),
+        ('video.mp4', 'mp4'),
+    ]
+    for path, typ in checks:
+        full = os.path.join(stream_dir, path)
+        if os.path.exists(full):
+            return full, typ
+    return None, None
+
+def render_clip_background(clip_dir, start, duration, stream_dir):
     out_path = os.path.join(clip_dir, 'clip.mp4')
     thumb_path = os.path.join(clip_dir, 'thumbnail.png')
     
+    input_video, typ = get_input_video(stream_dir)
+    if not input_video:
+        print("[ERROR] Kein Video gefunden")
+        return
+    
     cmd_clip = [
         'ffmpeg', '-y',
-        '-ss', str(start),
         '-i', input_video,
+        '-ss', str(start),
         '-t', str(duration),
         '-c:v', 'libx264',
         '-preset', 'ultrafast',
         '-c:a', 'aac',
+        '-copyts',
+        '-start_at_zero',
+        '-avoid_negative_ts', 'make_zero',
         out_path
     ]
     
     try:
-        result = subprocess.run(cmd_clip, check=True, capture_output=True, text=True)
+        subprocess.run(cmd_clip, check=True, capture_output=True, text=True)
         
         if os.path.exists(out_path):
             cmd_thumb = [
@@ -57,15 +80,11 @@ def render_clip_background(clip_dir, start, duration, input_video):
                 '-q:v', '2',
                 thumb_path
             ]
-            result = subprocess.run(cmd_thumb, check=True, capture_output=True, text=True)
-        else:
-            print(f"[ERROR] Clip MP4 nicht erstellt: {out_path}")
+            subprocess.run(cmd_thumb, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as e:
-        print(f"[ERROR] FFmpeg Error (returncode={e.returncode}):")
-        print(f"  Stdout: {e.stdout}")
-        print(f"  Stderr: {e.stderr}")
+        print(f"[ERROR] FFmpeg Error: {e.stderr}")
     except Exception as e:
-        print(f"[ERROR] Unerwarteter Fehler: {type(e).__name__}: {str(e)}")
+        print(f"[ERROR] {e}")
 
 @vod_bp.route('/stream/info')
 @login_required
@@ -218,17 +237,11 @@ def create_clip():
         json.dump(clip_data, f, indent=2)
 
     stream_dir = os.path.join(VOD_FOLDER, stream_id)
-    input_video = None
-    checks = ['video/playlist.m3u8', 'video/index.m3u8', 'playlist.m3u8', 'index.m3u8', 'video.mp4', f'{stream_id}.mp4']
-    for path in checks:
-        full_path = os.path.join(stream_dir, path)
-        if os.path.exists(full_path):
-            input_video = full_path
-            break
+    input_video, _ = get_input_video(stream_dir)
             
     if input_video:
         duration = float(end) - float(start)
-        thread = threading.Thread(target=render_clip_background, args=(clip_dir, start, duration, input_video))
+        thread = threading.Thread(target=render_clip_background, args=(clip_dir, start, duration, stream_dir))
         thread.daemon = True
         thread.start()
         
@@ -236,7 +249,6 @@ def create_clip():
 
 @vod_bp.route('/vod/clips/<clip_id>/<path:filename>')
 def serve_clip_file(clip_id, filename):
-    """Serve clip files (thumbnail.png, clip.mp4, etc.)"""
     clip_dir = os.path.join(VOD_FOLDER, 'clips', clip_id)
     return send_from_directory(clip_dir, filename)
 
@@ -311,29 +323,22 @@ def download_clip(clip_id):
         duration = end - start
         
         stream_dir = os.path.join(VOD_FOLDER, stream_id)
-        input_video = None
-        checks = [
-            'video/playlist.m3u8', 'video/index.m3u8',
-            'playlist.m3u8', 'index.m3u8',
-            'video.mp4', f'{stream_id}.mp4'
-        ]
-        for path in checks:
-            full_path = os.path.join(stream_dir, path)
-            if os.path.exists(full_path):
-                input_video = full_path
-                break
+        input_video, _ = get_input_video(stream_dir)
                 
         if not input_video:
             return jsonify({'error': 'Source video not found'}), 404
             
         cmd = [
             'ffmpeg', '-y',
-            '-ss', str(start),
             '-i', input_video,
+            '-ss', str(start),
             '-t', str(duration),
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
             '-c:a', 'aac',
+            '-copyts',
+            '-start_at_zero',
+            '-avoid_negative_ts', 'make_zero',
             out_path
         ]
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

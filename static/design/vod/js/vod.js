@@ -15,7 +15,7 @@ let clipEnd = 0;
 let clipGeneratedHash = null;
 
 let video, playPauseBtn, muteBtn, volumeSlider, fullscreenBtn;
-let progressContainer, progressBar, timeDisplay, bigPlayBtn, videoContainer;
+let progressContainer, progressBar, progressBuffer, timeDisplay, bigPlayBtn, videoContainer;
 let isDragging = false;
 
 window.addEventListener('load', () => {
@@ -151,7 +151,6 @@ async function loadVods() {
             card.className = 'card';
             
             let displayDuration = vod.duration;
-            // Nur wenn ended_at fehlt, ist es eine Live-Aufnahme
             if (!vod.ended_at && vod.date) {
                 const startTime = new Date(vod.date).getTime();
                 displayDuration = Math.floor((Date.now() - startTime) / 1000);
@@ -240,6 +239,7 @@ function initPlayerElements() {
   fullscreenBtn = document.getElementById('fullscreenBtn');
   progressContainer = document.getElementById('progressContainer');
   progressBar = document.getElementById('progressBar');
+  progressBuffer = document.getElementById('progressBuffer');
   timeDisplay = document.getElementById('timeDisplay');
   bigPlayBtn = document.getElementById('bigPlayBtn');
   videoContainer = document.getElementById('videoContainer');
@@ -300,6 +300,15 @@ function setupPlayerControls() {
         if (dot) dot.style.left = `${Math.min(100, percent)}%`;
         
         timeDisplay.innerText = `${formatClipTime(curr)} / ${formatClipTime(currentVideoDuration)}`;
+    });
+
+    video.addEventListener('progress', () => {
+        if (!currentVideoDuration || currentVideoDuration === 0) return;
+        if (video.buffered.length > 0) {
+            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+            const percent = (bufferedEnd / currentVideoDuration) * 100;
+            if (progressBuffer) progressBuffer.style.width = `${Math.min(100, percent)}%`;
+        }
     });
 
     playPauseBtn.addEventListener('click', togglePlay);
@@ -384,7 +393,7 @@ async function playVOD(streamId) {
         currentOutages = meta.outages || [];
         
         document.getElementById('vodModalTitle').innerText = meta.title || 'Stream';
-        document.getElementById('vodGameBadge').innerHTML = `<i class="fas fa-gamepad"></i> ${meta.game || 'Unbekannt'}`;
+        document.getElementById('vodGameBadge').innerText = meta.game || 'Unbekannt';
         
         renderOutageDrawer(currentOutages);
         
@@ -653,10 +662,10 @@ function showClipResult() {
     document.getElementById('createClipBtn').disabled = false;
     
     const thumbImg = document.getElementById('clipResultImg');
+    const thumbContainer = document.getElementById('clipResultThumb');
     
-    // Warte darauf, dass das Thumbnail existiert
     let attempts = 0;
-    const maxAttempts = 60; // 60 * 500ms = 30 Sekunden
+    const maxAttempts = 60;
     
     const checkThumbnail = () => {
         thumbImg.src = `/api/vod/clips/${clipGeneratedHash}/thumbnail.png?t=${Date.now()}`;
@@ -664,7 +673,7 @@ function showClipResult() {
         thumbImg.onerror = () => {
             attempts++;
             if (attempts < maxAttempts) {
-                setTimeout(checkThumbnail, 500); // Versuche alle 500ms
+                setTimeout(checkThumbnail, 500);
             } else {
                 showToast('Fehler: Thumbnail konnte nicht erstellt werden');
                 thumbImg.onerror = null;
@@ -672,7 +681,6 @@ function showClipResult() {
         };
         
         thumbImg.onload = () => {
-            // Thumbnail erfolgreich geladen
             thumbImg.onerror = null;
             thumbImg.onload = null;
             
@@ -685,8 +693,7 @@ function showClipResult() {
             showToast('Clip erstellt!');
         };
         
-        // Klick auf das Bild pausiert den Player und öffnet Clip
-        thumbImg.onclick = () => {
+        thumbContainer.onclick = () => {
             video.pause();
             updatePlayPauseIcon();
             window.open(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`, '_blank');
@@ -701,7 +708,7 @@ function copyGeneratedLink() {
     updatePlayPauseIcon();
     
     navigator.clipboard.writeText(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`);
-    window.open(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`, '_blank');
+    showToast('Link kopiert!');
 }
 
 async function downloadGeneratedClip() {

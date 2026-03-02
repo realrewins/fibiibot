@@ -51,7 +51,6 @@ def render_clip_background(clip_dir, start, duration, stream_dir):
     
     input_video, typ = get_input_video(stream_dir)
     if not input_video:
-        print("[ERROR] Kein Video gefunden")
         return
     
     cmd_clip = [
@@ -61,10 +60,10 @@ def render_clip_background(clip_dir, start, duration, stream_dir):
         '-t', str(duration),
         '-c:v', 'libx264',
         '-preset', 'ultrafast',
+        '-crf', '23',
         '-c:a', 'aac',
-        '-copyts',
-        '-start_at_zero',
         '-avoid_negative_ts', 'make_zero',
+        '-map_metadata', '-1',
         out_path
     ]
     
@@ -75,16 +74,14 @@ def render_clip_background(clip_dir, start, duration, stream_dir):
             cmd_thumb = [
                 'ffmpeg', '-y',
                 '-i', out_path,
-                '-ss', '00:00:00.500',
+                '-ss', '0.5',
                 '-vframes', '1',
                 '-q:v', '2',
                 thumb_path
             ]
             subprocess.run(cmd_thumb, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as e:
-        print(f"[ERROR] FFmpeg Error: {e.stderr}")
-    except Exception as e:
-        print(f"[ERROR] {e}")
+    except:
+        pass
 
 @vod_bp.route('/stream/info')
 @login_required
@@ -319,8 +316,7 @@ def download_clip(clip_id):
             
         stream_id = clip_data.get('stream_id')
         start = float(clip_data.get('start', 0))
-        end = float(clip_data.get('end', 0))
-        duration = end - start
+        duration = float(clip_data.get('end', 0)) - start
         
         stream_dir = os.path.join(VOD_FOLDER, stream_id)
         input_video, _ = get_input_video(stream_dir)
@@ -335,16 +331,16 @@ def download_clip(clip_id):
             '-t', str(duration),
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
+            '-crf', '23',
             '-c:a', 'aac',
-            '-copyts',
-            '-start_at_zero',
             '-avoid_negative_ts', 'make_zero',
+            '-map_metadata', '-1',
             out_path
         ]
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return send_file(out_path, as_attachment=True, download_name=filename)
     except Exception as e:
-        return jsonify({'error': f'Fehler beim Erstellen des Downloads: {str(e)}'}), 500
+        return jsonify({'error': str(e)}), 500
 
 @vod_bp.route('/download/session__settings')
 def download_chatty_settings():

@@ -13,7 +13,7 @@ CHANNEL = "fibii"
 BASE_DIR = "/srv/fibiibot"
 VOD_DIR = os.path.join(BASE_DIR, "vod")
 LIVE_CHECK_INTERVAL = 2
-THUMBNAIL_INTERVAL = 10
+THUMBNAIL_INTERVAL = 600
 
 os.makedirs(VOD_DIR, exist_ok=True)
 

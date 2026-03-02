@@ -653,19 +653,47 @@ function showClipResult() {
     document.getElementById('createClipBtn').disabled = false;
     
     const thumbImg = document.getElementById('clipResultImg');
-    thumbImg.src = `/api/vod/clips/${clipGeneratedHash}/thumbnail.png?t=${Date.now()}`;
     
-    thumbImg.onclick = () => {
-        video.pause();
-        updatePlayPauseIcon();
-        window.open(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`, '_blank');
+    // Warte darauf, dass das Thumbnail existiert
+    let attempts = 0;
+    const maxAttempts = 60; // 60 * 500ms = 30 Sekunden
+    
+    const checkThumbnail = () => {
+        thumbImg.src = `/api/vod/clips/${clipGeneratedHash}/thumbnail.png?t=${Date.now()}`;
+        
+        thumbImg.onerror = () => {
+            attempts++;
+            if (attempts < maxAttempts) {
+                setTimeout(checkThumbnail, 500); // Versuche alle 500ms
+            } else {
+                showToast('Fehler: Thumbnail konnte nicht erstellt werden');
+                thumbImg.onerror = null;
+            }
+        };
+        
+        thumbImg.onload = () => {
+            // Thumbnail erfolgreich geladen
+            thumbImg.onerror = null;
+            thumbImg.onload = null;
+            
+            document.getElementById('clipLinkSpan').innerText = `fibiibot.com/vod/clips/${clipGeneratedHash}`;
+            
+            const resArea = document.getElementById('clipResultArea');
+            resArea.style.marginTop = '15px';
+            resArea.style.maxHeight = '400px';
+            
+            showToast('Clip erstellt!');
+        };
+        
+        // Klick auf das Bild pausiert den Player und öffnet Clip
+        thumbImg.onclick = () => {
+            video.pause();
+            updatePlayPauseIcon();
+            window.open(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`, '_blank');
+        };
     };
-
-    document.getElementById('clipLinkSpan').innerText = `fibiibot.com/vod/clips/${clipGeneratedHash}`;
     
-    const resArea = document.getElementById('clipResultArea');
-    resArea.style.marginTop = '15px';
-    resArea.style.maxHeight = '400px';
+    checkThumbnail();
 }
 
 function copyGeneratedLink() {

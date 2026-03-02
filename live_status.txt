@@ -1,4 +1,4 @@
-Letzter Check: 11:15:41
+Letzter Check: 11:58:34
 🟢 recfibiibot
-🟢 webfibiibot
+🔴 webfibiibot
 🟢 apifibiibot

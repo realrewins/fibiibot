@@ -1,0 +1,35 @@
+Project Folder + Venv:
+
+cd /srv/fibiibot
+source venv/bin/activate
+
+
+Sudo:
+
+sudo systemctl start webfibiibot 
+sudo systemctl restart webfibiibot
+sudo systemctl stop webfibiibot
+sudo systemctl status webfibiibot
+
+sudo systemctl start recfibiibot 
+sudo systemctl restart recfibiibot
+sudo systemctl stop recfibiibot
+sudo systemctl status recfibiibot
+
+sudo systemctl start apifibiibot 
+sudo systemctl restart apifibiibot
+sudo systemctl stop apifibiibot
+sudo systemctl status apifibiibot
+
+sudo systemctl start statusfibiibot 
+sudo systemctl restart statusfibiibot
+sudo systemctl stop statusfibiibot
+sudo systemctl status statusfibiibot
+
+
+GitHub:
+
+git status
+git add -A 
+git commit -m ""
+git push

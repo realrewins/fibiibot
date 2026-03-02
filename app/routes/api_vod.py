@@ -46,7 +46,7 @@ def render_clip_background(clip_dir, start, duration, input_video):
     ]
     
     try:
-        subprocess.run(cmd_clip, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        result = subprocess.run(cmd_clip, check=True, capture_output=True, text=True)
         
         if os.path.exists(out_path):
             cmd_thumb = [
@@ -57,9 +57,15 @@ def render_clip_background(clip_dir, start, duration, input_video):
                 '-q:v', '2',
                 thumb_path
             ]
-            subprocess.run(cmd_thumb, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception:
-        pass
+            result = subprocess.run(cmd_thumb, check=True, capture_output=True, text=True)
+        else:
+            print(f"[ERROR] Clip MP4 nicht erstellt: {out_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"[ERROR] FFmpeg Error (returncode={e.returncode}):")
+        print(f"  Stdout: {e.stdout}")
+        print(f"  Stderr: {e.stderr}")
+    except Exception as e:
+        print(f"[ERROR] Unerwarteter Fehler: {type(e).__name__}: {str(e)}")
 
 @vod_bp.route('/stream/info')
 @login_required
@@ -227,6 +233,12 @@ def create_clip():
         thread.start()
         
     return jsonify({'hash': hash_val})
+
+@vod_bp.route('/vod/clips/<clip_id>/<path:filename>')
+def serve_clip_file(clip_id, filename):
+    """Serve clip files (thumbnail.png, clip.mp4, etc.)"""
+    clip_dir = os.path.join(VOD_FOLDER, 'clips', clip_id)
+    return send_from_directory(clip_dir, filename)
 
 @vod_bp.route('/clip/<clip_id>/info')
 def clip_info(clip_id):

@@ -357,6 +357,24 @@ function setupPlayerControls() {
             document.exitFullscreen();
         }
     });
+
+    // Tastatur-Steuerung: Space = Pause/Play, Pfeiltasten = 5s vor/zurück
+    document.addEventListener('keydown', (e) => {
+        if (!video || !currentVideoId) return;
+        // Nicht auslösen wenn man in einem Input-Feld tippt
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.code === 'Space') {
+            e.preventDefault();
+            togglePlay();
+        } else if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            video.currentTime = Math.min(video.currentTime + 5, currentVideoDuration);
+        } else if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            video.currentTime = Math.max(video.currentTime - 5, 0);
+        }
+    });
 }
 
 function togglePlay() {
@@ -589,10 +607,19 @@ function createClip() {
     const loadArea = document.getElementById('clipLoadingArea');
     const resultArea = document.getElementById('clipResultArea');
     const bar = document.getElementById('clipLoadingBar');
+    const thumbImg = document.getElementById('clipResultImg');
 
     btn.disabled = true;
+    clipGeneratedHash = null;
+
+    // Reset vom vorherigen Clip
     resultArea.style.maxHeight = '0px';
     resultArea.style.marginTop = '0px';
+    if (thumbImg) {
+        thumbImg.onerror = null;
+        thumbImg.onload = null;
+        thumbImg.src = '';
+    }
 
     loadArea.style.maxHeight = '20px';
     loadArea.style.marginTop = '15px';

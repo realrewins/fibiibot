@@ -8,6 +8,7 @@ import subprocess
 import re
 import threading
 import time
+import tempfile
 from flask import Blueprint, jsonify, send_from_directory, request, send_file, session
 from datetime import datetime
 from app.decorators import login_required
@@ -45,32 +46,125 @@ def get_input_video(stream_dir):
             return full, typ
     return None, None
 
+def parse_m3u8(playlist_path):
+    """Parst die .m3u8 Playlist und gibt eine Liste von (duration, segment_path) zurück."""
+    segments = []
+    playlist_dir = os.path.dirname(playlist_path)
+    current_duration = 0.0
+
+    with open(playlist_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('#EXTINF:'):
+                current_duration = float(line.split(':')[1].rstrip(','))
+            elif line and not line.startswith('#'):
+                seg_path = os.path.join(playlist_dir, line)
+                segments.append((current_duration, seg_path))
+
+    return segments
+
+def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
+    """
+    Schneidet einen Clip.
+    Bei HLS: Parst die Playlist, concateniert nur die nötigen Segmente, schneidet exakt.
+    Bei MP4: Normales Input-Seeking.
+    """
+    start = float(start)
+    duration = float(duration)
+
+    if typ == 'hls':
+        segments = parse_m3u8(input_video)
+        if not segments:
+            raise Exception("Keine Segmente in Playlist gefunden")
+
+        # Berechne welche Segmente wir brauchen
+        cumulative = 0.0
+        start_idx = 0
+        end_idx = len(segments) - 1
+
+        # Finde Start-Segment
+        for i, (seg_dur, seg_path) in enumerate(segments):
+            if cumulative + seg_dur > start:
+                start_idx = i
+                break
+            cumulative += seg_dur
+
+        # Offset innerhalb des Start-Segments
+        offset_in_segment = start - cumulative
+
+        # Finde End-Segment (mit Puffer)
+        clip_end = start + duration
+        cumulative2 = 0.0
+        for i, (seg_dur, seg_path) in enumerate(segments):
+            cumulative2 += seg_dur
+            if cumulative2 >= clip_end + 10:  # 10s Puffer
+                end_idx = i
+                break
+
+        # Erstelle concat-Liste mit den nötigen Segmenten
+        needed = segments[start_idx:end_idx + 1]
+
+        concat_file = os.path.join(os.path.dirname(out_path), 'concat.txt')
+        try:
+            with open(concat_file, 'w') as f:
+                for seg_dur, seg_path in needed:
+                    f.write(f"file '{seg_path}'\n")
+
+            # Schneide aus den concatenierten Segmenten
+            cmd = [
+                'ffmpeg', '-y',
+                '-f', 'concat',
+                '-safe', '0',
+                '-i', concat_file,
+                '-ss', str(offset_in_segment),
+                '-t', str(duration),
+                '-c:v', 'libx264',
+                '-preset', 'ultrafast',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-avoid_negative_ts', 'make_zero',
+                '-map_metadata', '-1',
+                out_path
+            ]
+
+            print(f"[CLIP] start={start}, duration={duration}, segments={start_idx}-{end_idx}, offset={offset_in_segment}")
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"[CLIP] FFmpeg error: {result.stderr[-500:]}")
+                raise subprocess.CalledProcessError(result.returncode, cmd)
+            print(f"[CLIP] OK, size={os.path.getsize(out_path) if os.path.exists(out_path) else 0}")
+        finally:
+            if os.path.exists(concat_file):
+                os.remove(concat_file)
+    else:
+        # MP4: normales Input-Seeking
+        cmd = [
+            'ffmpeg', '-y',
+            '-ss', str(start),
+            '-i', input_video,
+            '-t', str(duration),
+            '-c:v', 'libx264',
+            '-preset', 'ultrafast',
+            '-crf', '23',
+            '-c:a', 'aac',
+            '-avoid_negative_ts', 'make_zero',
+            '-map_metadata', '-1',
+            out_path
+        ]
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+
 def render_clip_background(clip_dir, start, duration, stream_dir):
     out_path = os.path.join(clip_dir, 'clip.mp4')
     thumb_path = os.path.join(clip_dir, 'thumbnail.png')
-    
+
     input_video, typ = get_input_video(stream_dir)
     if not input_video:
         return
-    
-    cmd_clip = [
-        'ffmpeg', '-y',
-        '-i', input_video,
-        '-ss', str(start),
-        '-t', str(duration),
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-crf', '23',
-        '-c:a', 'aac',
-        '-avoid_negative_ts', 'make_zero',
-        '-map_metadata', '-1',
-        out_path
-    ]
-    
+
     try:
-        subprocess.run(cmd_clip, check=True, capture_output=True, text=True)
-        
-        if os.path.exists(out_path):
+        ffmpeg_cut_clip(input_video, typ, start, duration, out_path)
+
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
             cmd_thumb = [
                 'ffmpeg', '-y',
                 '-i', out_path,
@@ -80,8 +174,8 @@ def render_clip_background(clip_dir, start, duration, stream_dir):
                 thumb_path
             ]
             subprocess.run(cmd_thumb, check=True, capture_output=True, text=True)
-    except:
-        pass
+    except Exception as e:
+        print(f"[CLIP] Error: {e}")
 
 @vod_bp.route('/stream/info')
 @login_required
@@ -137,10 +231,10 @@ def list_vods():
             thumbnail = f'/api/vod/{stream_id}/thumbnail.png'
             duration = 0
             if 'started_at' in meta and 'ended_at' in meta:
-                start = datetime.fromisoformat(meta['started_at'].replace('Z', '+00:00'))
-                end = datetime.fromisoformat(meta['ended_at'].replace('Z', '+00:00'))
-                duration = int((end - start).total_seconds())
-                
+                s = datetime.fromisoformat(meta['started_at'].replace('Z', '+00:00'))
+                e = datetime.fromisoformat(meta['ended_at'].replace('Z', '+00:00'))
+                duration = int((e - s).total_seconds())
+
             thumb_disk = os.path.join(stream_path, 'thumbnail.png')
             sessions.append({
                 'id': stream_id,
@@ -165,14 +259,14 @@ def vod_info(stream_id):
         with open(meta_path, 'r', encoding='utf-8') as f:
             meta = json.load(f)
         if 'started_at' in meta and 'ended_at' in meta:
-            start = datetime.fromisoformat(meta['started_at'].replace('Z', '+00:00'))
-            end = datetime.fromisoformat(meta['ended_at'].replace('Z', '+00:00'))
-            meta['duration'] = int((end - start).total_seconds())
-            
+            s = datetime.fromisoformat(meta['started_at'].replace('Z', '+00:00'))
+            e = datetime.fromisoformat(meta['ended_at'].replace('Z', '+00:00'))
+            meta['duration'] = int((e - s).total_seconds())
+
         stream_dir = os.path.join(VOD_FOLDER, stream_id)
         video_url = None
         video_type = None
-        
+
         checks = [
             ('video/playlist.m3u8', 'hls'),
             ('video/index.m3u8', 'hls'),
@@ -181,16 +275,16 @@ def vod_info(stream_id):
             ('video.mp4', 'mp4'),
             (f'{stream_id}.mp4', 'mp4')
         ]
-        
+
         for path, vtype in checks:
             if os.path.exists(os.path.join(stream_dir, path)):
                 video_url = f'/api/vod/{stream_id}/{path}'
                 video_type = vtype
                 break
-                
+
         meta['video_url'] = video_url
         meta['video_type'] = video_type
-        
+
         return jsonify(meta)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -200,7 +294,7 @@ def vod_info(stream_id):
 def create_clip():
     if not validate_csrf():
         return jsonify({'error': 'Invalid CSRF token'}), 403
-        
+
     data = request.json
     stream_id = data.get('streamId')
     start = data.get('start')
@@ -208,16 +302,16 @@ def create_clip():
     name = data.get('name')
     start_formatted = data.get('startFormatted', '00:00:00')
     end_formatted = data.get('endFormatted', '00:00:00')
-    
+
     if not stream_id or start is None or end is None or not name:
         return jsonify({'error': 'Missing fields'}), 400
-        
+
     hash_val = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     clip_dir = os.path.join(VOD_FOLDER, 'clips', hash_val)
     os.makedirs(clip_dir, exist_ok=True)
-    
+
     creator = session.get('user', {}).get('name', 'Unknown')
-    
+
     clip_data = {
         'id': hash_val,
         'stream_id': stream_id,
@@ -229,19 +323,19 @@ def create_clip():
         'start_formatted': start_formatted,
         'end_formatted': end_formatted
     }
-    
+
     with open(os.path.join(clip_dir, 'meta.json'), 'w', encoding='utf-8') as f:
         json.dump(clip_data, f, indent=2)
 
     stream_dir = os.path.join(VOD_FOLDER, stream_id)
-    input_video, _ = get_input_video(stream_dir)
-            
+    input_video, typ = get_input_video(stream_dir)
+
     if input_video:
         duration = float(end) - float(start)
         thread = threading.Thread(target=render_clip_background, args=(clip_dir, start, duration, stream_dir))
         thread.daemon = True
         thread.start()
-        
+
     return jsonify({'hash': hash_val})
 
 @vod_bp.route('/vod/clips/<clip_id>/<path:filename>')
@@ -256,16 +350,16 @@ def clip_info(clip_id):
         meta_path = os.path.join(clip_dir, 'meta.json')
         if not os.path.exists(meta_path):
             return jsonify({'error': 'Clip not found'}), 404
-            
+
         with open(meta_path, 'r', encoding='utf-8') as f:
             clip_data = json.load(f)
-            
+
         stream_id = clip_data.get('stream_id')
         if stream_id:
             stream_dir = os.path.join(VOD_FOLDER, stream_id)
             video_url = None
             video_type = None
-            
+
             checks = [
                 ('video/playlist.m3u8', 'hls'),
                 ('video/index.m3u8', 'hls'),
@@ -274,16 +368,16 @@ def clip_info(clip_id):
                 ('video.mp4', 'mp4'),
                 (f'{stream_id}.mp4', 'mp4')
             ]
-            
+
             for path, vtype in checks:
                 if os.path.exists(os.path.join(stream_dir, path)):
                     video_url = f'/api/vod/{stream_id}/{path}'
                     video_type = vtype
                     break
-                    
+
             clip_data['video_url'] = video_url
             clip_data['video_type'] = video_type
-            
+
         return jsonify(clip_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -300,44 +394,31 @@ def download_clip(clip_id):
         clip_dir = os.path.join(VOD_FOLDER, 'clips', clip_id)
         meta_path = os.path.join(clip_dir, 'meta.json')
         out_path = os.path.join(clip_dir, 'clip.mp4')
-        
+
         if not os.path.exists(meta_path):
             return jsonify({'error': 'Clip not found'}), 404
-            
+
         with open(meta_path, 'r', encoding='utf-8') as f:
             clip_data = json.load(f)
 
         safe_name = re.sub(r'[\\/*?:"<>|]', "", clip_data.get('name', 'clip'))
         safe_name = safe_name.strip() or f"clip_{clip_id}"
         filename = f"{safe_name}.mp4"
-            
+
         if os.path.exists(out_path):
             return send_file(out_path, as_attachment=True, download_name=filename)
-            
+
         stream_id = clip_data.get('stream_id')
         start = float(clip_data.get('start', 0))
         duration = float(clip_data.get('end', 0)) - start
-        
+
         stream_dir = os.path.join(VOD_FOLDER, stream_id)
-        input_video, _ = get_input_video(stream_dir)
-                
+        input_video, typ = get_input_video(stream_dir)
+
         if not input_video:
             return jsonify({'error': 'Source video not found'}), 404
-            
-        cmd = [
-            'ffmpeg', '-y',
-            '-i', input_video,
-            '-ss', str(start),
-            '-t', str(duration),
-            '-c:v', 'libx264',
-            '-preset', 'ultrafast',
-            '-crf', '23',
-            '-c:a', 'aac',
-            '-avoid_negative_ts', 'make_zero',
-            '-map_metadata', '-1',
-            out_path
-        ]
-        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        ffmpeg_cut_clip(input_video, typ, start, duration, out_path)
         return send_file(out_path, as_attachment=True, download_name=filename)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

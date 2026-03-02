@@ -32,7 +32,9 @@ def cleanup_old_clips():
 
 def render_clip_background(clip_dir, start, duration, input_video):
     out_path = os.path.join(clip_dir, 'clip.mp4')
-    cmd = [
+    thumb_path = os.path.join(clip_dir, 'thumbnail.png')
+    
+    cmd_clip = [
         'ffmpeg', '-y',
         '-ss', str(start),
         '-i', input_video,
@@ -42,15 +44,27 @@ def render_clip_background(clip_dir, start, duration, input_video):
         '-c:a', 'aac',
         out_path
     ]
+    
     try:
-        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(cmd_clip, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
+        if os.path.exists(out_path):
+            cmd_thumb = [
+                'ffmpeg', '-y',
+                '-i', out_path,
+                '-ss', '00:00:00.500',
+                '-vframes', '1',
+                '-q:v', '2',
+                thumb_path
+            ]
+            subprocess.run(cmd_thumb, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception:
         pass
 
 @vod_bp.route('/stream/info')
 @login_required
 def stream_info():
-    channel = "letshugotv"
+    channel = "fibii"
     access_token = get_twitch_access_token()
     if not access_token:
         return jsonify({'error': 'Twitch API nicht verfügbar'}), 503
@@ -111,6 +125,7 @@ def list_vods():
                 'title': meta.get('title', 'Unbekannter Stream'),
                 'game': meta.get('game', ''),
                 'date': meta.get('started_at', ''),
+                'ended_at': meta.get('ended_at'),
                 'duration': duration,
                 'thumbnail': thumbnail if os.path.exists(thumb_disk) else '/static/img/vod-placeholder.jpg'
             })
@@ -176,14 +191,10 @@ def create_clip():
         return jsonify({'error': 'Missing fields'}), 400
         
     hash_val = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-    
-    clip_base_dir = os.path.join(VOD_FOLDER, 'clips')
-    clip_dir = os.path.join(clip_base_dir, hash_val)
+    clip_dir = os.path.join(VOD_FOLDER, 'clips', hash_val)
     os.makedirs(clip_dir, exist_ok=True)
     
     creator = session.get('user', {}).get('name', 'Unknown')
-    if not creator:
-        creator = "Unknown"
     
     clip_data = {
         'id': hash_val,
@@ -202,11 +213,7 @@ def create_clip():
 
     stream_dir = os.path.join(VOD_FOLDER, stream_id)
     input_video = None
-    checks = [
-        'video/playlist.m3u8', 'video/index.m3u8',
-        'playlist.m3u8', 'index.m3u8',
-        'video.mp4', f'{stream_id}.mp4'
-    ]
+    checks = ['video/playlist.m3u8', 'video/index.m3u8', 'playlist.m3u8', 'index.m3u8', 'video.mp4', f'{stream_id}.mp4']
     for path in checks:
         full_path = os.path.join(stream_dir, path)
         if os.path.exists(full_path):
@@ -214,23 +221,6 @@ def create_clip():
             break
             
     if input_video:
-        thumb_time = float(start) + 1.0
-        if thumb_time > float(end):
-            thumb_time = float(start)
-        thumb_out = os.path.join(clip_dir, 'thumbnail.png')
-        cmd = [
-            'ffmpeg', '-y',
-            '-ss', str(thumb_time),
-            '-i', input_video,
-            '-frames:v', '1',
-            '-q:v', '2',
-            thumb_out
-        ]
-        try:
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except Exception:
-            pass
-
         duration = float(end) - float(start)
         thread = threading.Thread(target=render_clip_background, args=(clip_dir, start, duration, input_video))
         thread.daemon = True

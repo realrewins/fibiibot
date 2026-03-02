@@ -107,7 +107,7 @@ async function updateLiveStatus() {
         <span class="viewers"><i class="fas fa-eye"></i> ${data.viewers || 0} Zuschauer</span>
       `;
 
-      const channel = 'letshugotv';
+      const channel = 'fibii';
       const host = window.location.hostname;
 
       let iframe = container.querySelector('iframe');
@@ -146,51 +146,33 @@ async function loadVods() {
         const data = await res.json();
         const vods = Array.isArray(data.vods) ? data.vods : [];
         
-        if (vods.length === 0) {
-            grid.innerHTML = '<div class="empty-state">Keine aufgezeichneten Streams vorhanden.</div>';
-            return;
-        }
-
         vods.forEach(vod => {
             const card = document.createElement('div');
             card.className = 'card';
             
-            // Berechnung der Dauer für Live-Aufnahmen
             let displayDuration = vod.duration;
+            // Nur wenn ended_at fehlt, ist es eine Live-Aufnahme
             if (!vod.ended_at && vod.date) {
                 const startTime = new Date(vod.date).getTime();
-                const now = new Date().getTime();
-                displayDuration = Math.floor((now - startTime) / 1000);
+                displayDuration = Math.floor((Date.now() - startTime) / 1000);
             }
 
-            const dateText = vod.date ? new Date(vod.date).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
-            const durationText = typeof displayDuration === 'number' ? formatDurationText(displayDuration) : '0s';
-
+            const durationText = formatDurationText(displayDuration);
             card.innerHTML = `
-                <div class="thumb" data-vod-id="${escapeHtmlAttr(vod.id)}">
-                    <img src="${escapeHtmlAttr(vod.thumbnail || '')}" alt="">
-                    <span class="game-badge">${escapeHtml(vod.game || 'Aufnahme')}</span>
-                    <span class="time-badge ${!vod.ended_at ? 'live-recording' : ''}">${!vod.ended_at ? '<i class="fas fa-circle"></i> ' : ''}${escapeHtml(durationText)}</span>
+                <div class="thumb">
+                    <img src="${vod.thumbnail}" alt="">
+                    <span class="game-badge">${vod.game || 'Aufnahme'}</span>
+                    <span class="time-badge ${!vod.ended_at ? 'live-recording' : ''}">${!vod.ended_at ? '<i class="fas fa-circle"></i> ' : ''}${durationText}</span>
                     <div class="play-overlay"><div class="play-icon"></div></div>
                 </div>
                 <div class="info">
-                    <div class="meta-row"><span>${escapeHtml(dateText)}</span></div>
-                    <div class="title">${escapeHtml(vod.title || 'Unbekannter Stream')}</div>
-                    <div class="actions">
-                        <span class="file-size">${escapeHtml(durationText)}</span>
-                        <div class="btn-group">
-                            <a href="#" class="btn-icon dl" title="Download" data-dl="${escapeHtmlAttr(vod.id)}"><i class="fas fa-download"></i></a>
-                            <a href="#" class="btn-icon del" title="Löschen" data-del="${escapeHtmlAttr(vod.id)}"><i class="fas fa-trash"></i></a>
-                        </div>
-                    </div>
+                    <div class="title">${vod.title}</div>
                 </div>
             `;
             grid.appendChild(card);
-            card.querySelector('.thumb')?.addEventListener('click', () => playVOD(vod.id));
+            card.querySelector('.thumb').onclick = () => playVOD(vod.id);
         });
-    } catch (e) {
-        grid.innerHTML = '<div class="empty-state">Fehler beim Laden der VODs.</div>';
-    }
+    } catch (e) { console.error(e); }
 }
 
 function formatDurationText(seconds) {
@@ -529,6 +511,10 @@ function renderTimelineMarkers(chapters) {
     const container = document.getElementById('progressContainer');
     if (!container) return;
 
+    container.style.background = 'transparent';
+    const bg = container.querySelector('.progress-bar-bg');
+    if (bg) bg.style.display = 'none';
+
     container.querySelectorAll('.timeline-marker').forEach(m => m.remove());
     
     if (!currentVideoDuration || currentVideoDuration === 0) return;
@@ -544,7 +530,6 @@ function renderTimelineMarkers(chapters) {
         });
     }
 }
-
 function handleOutagePlayback() {
     video.addEventListener('timeupdate', () => {
         if (!currentOutages) return;
@@ -667,11 +652,9 @@ function showClipResult() {
     document.getElementById('clipLoadingArea').style.maxHeight = '0px';
     document.getElementById('createClipBtn').disabled = false;
     
-    // Cache-Buster mit Date.now() sorgt dafür, dass das Bild neu geladen wird
     const thumbImg = document.getElementById('clipResultImg');
     thumbImg.src = `/api/vod/clips/${clipGeneratedHash}/thumbnail.png?t=${Date.now()}`;
     
-    // Klick auf das Bild pausiert den Player und öffnet Clip
     thumbImg.onclick = () => {
         video.pause();
         updatePlayPauseIcon();
@@ -683,21 +666,17 @@ function showClipResult() {
     const resArea = document.getElementById('clipResultArea');
     resArea.style.marginTop = '15px';
     resArea.style.maxHeight = '400px';
-    showToast('Clip erstellt!');
 }
 
 function copyGeneratedLink() {
-    // Pausiert den Player beim Kopieren/Öffnen
     video.pause();
     updatePlayPauseIcon();
     
     navigator.clipboard.writeText(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`);
-    showToast('Link kopiert!');
     window.open(`https://fibiibot.com/vod/clips/${clipGeneratedHash}`, '_blank');
 }
 
 async function downloadGeneratedClip() {
-    // Pausiert den Player beim Download
     video.pause();
     updatePlayPauseIcon();
 
@@ -708,7 +687,6 @@ async function downloadGeneratedClip() {
     const data = await res.json();
     
     if (!data.ready) {
-        showToast('Clip wird noch verarbeitet...');
         setTimeout(() => { btn.innerHTML = '<i class="fas fa-download"></i>'; }, 2000);
         return;
     }

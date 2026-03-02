@@ -9,11 +9,11 @@ import requests
 import threading
 from datetime import datetime, timezone
 
-CHANNEL = "gamerbrother"
+CHANNEL = "fibii"
 BASE_DIR = "/srv/fibiibot"
 VOD_DIR = os.path.join(BASE_DIR, "vod")
-LIVE_CHECK_INTERVAL = 15
-THUMBNAIL_INTERVAL = 600
+LIVE_CHECK_INTERVAL = 2
+THUMBNAIL_INTERVAL = 10
 
 os.makedirs(VOD_DIR, exist_ok=True)
 

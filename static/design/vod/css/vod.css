@@ -1530,18 +1530,31 @@ body {
     cursor: pointer;
     position: relative;
     margin-bottom: 5px;
+    background: transparent;
 }
 
 .progress-bar-bg {
-    display: none; /* Hintergrund komplett ausblenden */
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .progress-bar {
-    height: 100%;
+    height: 6px;
+    width: 0%;
     background: var(--accent);
     border-radius: 3px;
-    position: relative;
-    z-index: 2;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(145, 70, 255, 0.6);
 }
 
 .progress-bar::after {
@@ -1551,34 +1564,36 @@ body {
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
     animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 200%; }
 }
 
 .progress-dot {
     width: 14px;
     height: 14px;
-    background: #fff;
+    background: white;
     border-radius: 50%;
     position: absolute;
+    left: 0;
     top: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
     opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.progress-bar-container:hover .progress-dot {
-    opacity: 1;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
 .custom-player:hover .progress-dot {
     opacity: 1;
 }
 
-.progress-bar-container:hover {
-    height: 8px;
+.progress-bar-container:hover .progress-dot {
+    transform: translate(-50%, -50%) scale(1.3);
 }
 .controls-row {
     display: flex;

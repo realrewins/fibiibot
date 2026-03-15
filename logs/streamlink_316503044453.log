@@ -1,0 +1,12 @@
+[cli][info] streamlink is running as root! Be careful!
+[cli][info] Found matching plugin twitch for URL twitch.tv/peepohappynico
+[warnings][streamlinkdeprecation] The --twitch-disable-ads plugin argument has been disabled and will be removed in the future
+[cli][info] Available streams: audio_only, 1080p60 (worst, best)
+[cli][info] Opening stream: 1080p60 (hls)
+[plugins.twitch][info] Will skip ad segments
+[cli][info] Stream ended
+[cli][info] Closing currently open stream...
+[cli][info] streamlink is running as root! Be careful!
+[cli][info] Found matching plugin twitch for URL twitch.tv/peepohappynico
+[warnings][streamlinkdeprecation] The --twitch-disable-ads plugin argument has been disabled and will be removed in the future
+error: No playable streams found on this URL: twitch.tv/peepohappynico

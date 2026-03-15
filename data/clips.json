@@ -878,6 +878,70 @@
           "stringValue": "badge-jbl"
         }
       }
+    },
+    {
+      "id": "20260308114550846270",
+      "fields": {
+        "slug": {
+          "stringValue": "NiceHomelyPidgeonDoritosChip-BpCMqS4fYQ2H3ndA"
+        },
+        "name": {
+          "stringValue": "🟣More Zerups #Werbung"
+        },
+        "partner": {
+          "stringValue": "more"
+        },
+        "dateAttr": {
+          "stringValue": "2026-03-08"
+        },
+        "dateDisplay": {
+          "stringValue": "08.03.2026"
+        },
+        "views": {
+          "integerValue": "1"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/58532a0a-d6dc-4fa0-b199-132029d3ea33/landscape/thumb/thumb-0000000000-480x272.jpg"
+        },
+        "timestamp": {
+          "stringValue": "2026-03-08T11:43:12Z"
+        },
+        "badge": {
+          "stringValue": "badge-more"
+        }
+      }
+    },
+    {
+      "id": "20260309164743689978",
+      "fields": {
+        "slug": {
+          "stringValue": "CaringManlyCheddarFreakinStinkin-uxOPOOS8QP8tlruc"
+        },
+        "name": {
+          "stringValue": "JBL beste Marke #Werbung"
+        },
+        "partner": {
+          "stringValue": "jbl"
+        },
+        "dateAttr": {
+          "stringValue": "2026-03-09"
+        },
+        "dateDisplay": {
+          "stringValue": "09.03.2026"
+        },
+        "views": {
+          "integerValue": "1"
+        },
+        "thumbnail": {
+          "stringValue": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/648e074c-046e-4c1b-b11a-cfcdcca3be13/landscape/thumb/thumb-0000000000-480x272.jpg"
+        },
+        "timestamp": {
+          "stringValue": "2026-03-09T16:45:22Z"
+        },
+        "badge": {
+          "stringValue": "badge-jbl"
+        }
+      }
     }
   ]
 }

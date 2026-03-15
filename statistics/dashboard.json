@@ -1,11 +1,59 @@
 [
   {
+    "id": "316566597477",
+    "timestamp": "2026-03-09T14:14:00Z",
+    "watched": 399967,
+    "viewers": 1394,
+    "followers": 157,
+    "uptime": 17223
+  },
+  {
+    "id": "316400055271",
+    "timestamp": "2026-03-08T10:19:34Z",
+    "watched": 547412,
+    "viewers": 1017,
+    "followers": 150,
+    "uptime": 32282
+  },
+  {
+    "id": "316390605415",
+    "timestamp": "2026-03-07T14:44:12Z",
+    "watched": 267962,
+    "viewers": 774,
+    "followers": 64,
+    "uptime": 20765
+  },
+  {
+    "id": "316602580710",
+    "timestamp": "2026-03-06T10:53:03Z",
+    "watched": 422769,
+    "viewers": 873,
+    "followers": 176,
+    "uptime": 29046
+  },
+  {
+    "id": "316356691559",
+    "timestamp": "2026-03-04T12:18:34Z",
+    "watched": 238577,
+    "viewers": 869,
+    "followers": 107,
+    "uptime": 16462
+  },
+  {
+    "id": "316349160423",
+    "timestamp": "2026-03-03T17:03:08Z",
+    "watched": 213269,
+    "viewers": 938,
+    "followers": 118,
+    "uptime": 13654
+  },
+  {
     "id": "316565119334",
     "timestamp": "2026-03-02T16:31:00Z",
-    "watched": 101911,
-    "viewers": 1058,
-    "followers": 1051,
-    "uptime": 5777
+    "watched": 187300,
+    "viewers": 978,
+    "followers": 1066,
+    "uptime": 11487
   },
   {
     "id": "316470254950",

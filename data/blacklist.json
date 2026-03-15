@@ -59,35 +59,6 @@
       }
     },
     {
-      "id": "20260209215457303723",
-      "fields": {
-        "follower": {
-          "stringValue": "01.07.2022"
-        },
-        "statusText": {
-          "stringValue": "Mod Empfehlung"
-        },
-        "status": {
-          "stringValue": "empfehlung"
-        },
-        "name": {
-          "stringValue": "@xbeennnn"
-        },
-        "watchtime": {
-          "stringValue": "-"
-        },
-        "reason": {
-          "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "timestamp": {
-          "stringValue": "2026-02-04T00:32:48.386Z"
-        },
-        "views": {
-          "integerValue": "0"
-        }
-      }
-    },
-    {
       "id": "20260209215457303727",
       "fields": {
         "name": {
@@ -204,35 +175,6 @@
       }
     },
     {
-      "id": "20260209215457303738",
-      "fields": {
-        "timestamp": {
-          "stringValue": "2026-02-04T00:31:47.458Z"
-        },
-        "statusText": {
-          "stringValue": "Mod Empfehlung"
-        },
-        "follower": {
-          "stringValue": "23.09.2021"
-        },
-        "watchtime": {
-          "stringValue": "-"
-        },
-        "reason": {
-          "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "name": {
-          "stringValue": "@nicxarc"
-        },
-        "status": {
-          "stringValue": "empfehlung"
-        },
-        "views": {
-          "integerValue": "0"
-        }
-      }
-    },
-    {
       "id": "20260209215457303741",
       "fields": {
         "reason": {
@@ -320,64 +262,6 @@
       }
     },
     {
-      "id": "20260209215457303749",
-      "fields": {
-        "name": {
-          "stringValue": "@dalliancei"
-        },
-        "follower": {
-          "stringValue": "06.05.2023"
-        },
-        "statusText": {
-          "stringValue": "Mod Empfehlung"
-        },
-        "reason": {
-          "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "watchtime": {
-          "stringValue": "-"
-        },
-        "status": {
-          "stringValue": "empfehlung"
-        },
-        "timestamp": {
-          "stringValue": "2026-02-04T00:33:12.889Z"
-        },
-        "views": {
-          "integerValue": "0"
-        }
-      }
-    },
-    {
-      "id": "20260209215457303752",
-      "fields": {
-        "status": {
-          "stringValue": "empfehlung"
-        },
-        "timestamp": {
-          "stringValue": "2026-02-04T00:34:19.423Z"
-        },
-        "follower": {
-          "stringValue": "26.09.2022"
-        },
-        "statusText": {
-          "stringValue": "Mod Empfehlung"
-        },
-        "watchtime": {
-          "stringValue": "-"
-        },
-        "name": {
-          "stringValue": "@xjolyn"
-        },
-        "reason": {
-          "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "views": {
-          "integerValue": "0"
-        }
-      }
-    },
-    {
       "id": "20260209215457303757",
       "fields": {
         "status": {
@@ -429,64 +313,6 @@
         },
         "reason": {
           "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "views": {
-          "integerValue": "0"
-        }
-      }
-    },
-    {
-      "id": "20260209215457303763",
-      "fields": {
-        "status": {
-          "stringValue": "empfehlung"
-        },
-        "reason": {
-          "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "name": {
-          "stringValue": "@Chribo93"
-        },
-        "statusText": {
-          "stringValue": "Mod Empfehlung"
-        },
-        "timestamp": {
-          "stringValue": "2026-02-04T00:33:01.171Z"
-        },
-        "follower": {
-          "stringValue": "04.03.2024"
-        },
-        "watchtime": {
-          "stringValue": "-"
-        },
-        "views": {
-          "integerValue": "0"
-        }
-      }
-    },
-    {
-      "id": "20260209215457303765",
-      "fields": {
-        "name": {
-          "stringValue": "@ace_leontv"
-        },
-        "watchtime": {
-          "stringValue": "-"
-        },
-        "statusText": {
-          "stringValue": "Mod Empfehlung"
-        },
-        "reason": {
-          "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "status": {
-          "stringValue": "empfehlung"
-        },
-        "timestamp": {
-          "stringValue": "2026-02-04T00:33:43.330Z"
-        },
-        "follower": {
-          "stringValue": "16.01.2023"
         },
         "views": {
           "integerValue": "0"
@@ -574,35 +400,6 @@
         },
         "name": {
           "stringValue": "@Simex"
-        },
-        "views": {
-          "integerValue": "0"
-        }
-      }
-    },
-    {
-      "id": "20260209215457303776",
-      "fields": {
-        "timestamp": {
-          "stringValue": "2026-02-04T00:33:26.851Z"
-        },
-        "follower": {
-          "stringValue": "21.03.2022"
-        },
-        "reason": {
-          "stringValue": "engere Auswahl (letzte Modbewerbung)"
-        },
-        "status": {
-          "stringValue": "empfehlung"
-        },
-        "watchtime": {
-          "stringValue": "-"
-        },
-        "statusText": {
-          "stringValue": "Mod Empfehlung"
-        },
-        "name": {
-          "stringValue": "@05lxnndix"
         },
         "views": {
           "integerValue": "0"

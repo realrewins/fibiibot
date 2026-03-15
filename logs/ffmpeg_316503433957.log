@@ -1,0 +1,57 @@
+ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+  built with gcc 13 (Ubuntu 13.2.0-23ubuntu3)
+  configuration: --prefix=/usr --extra-version=3ubuntu5 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --disable-omx --enable-gnutls --enable-libaom --enable-libass --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libharfbuzz --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-openal --enable-opencl --enable-opengl --disable-sndio --enable-libvpl --disable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-ladspa --enable-libbluray --enable-libjack --enable-libpulse --enable-librabbitmq --enable-librist --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libx264 --enable-libzmq --enable-libzvbi --enable-lv2 --enable-sdl2 --enable-libplacebo --enable-librav1e --enable-pocketsphinx --enable-librsvg --enable-libjxl --enable-shared
+  libavutil      58. 29.100 / 58. 29.100
+  libavcodec     60. 31.102 / 60. 31.102
+  libavformat    60. 16.100 / 60. 16.100
+  libavdevice    60.  3.100 / 60.  3.100
+  libavfilter     9. 12.100 /  9. 12.100
+  libswscale      7.  5.100 /  7.  5.100
+  libswresample   4. 12.100 /  4. 12.100
+  libpostproc    57.  3.100 / 57.  3.100
+Input #0, mpegts, from 'pipe:0':
+  Duration: N/A, start: 70.033000, bitrate: N/A
+  Program 1 
+  Stream #0:0[0x100]: Audio: aac (LC) ([15][0][0][0] / 0x000F), 48000 Hz, stereo, fltp, 4 kb/s
+  Stream #0:1[0x101]: Video: h264 (High) ([27][0][0][0] / 0x001B), yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 60 fps, 60 tbr, 90k tbn
+  Stream #0:2[0x102]: Data: timed_id3 (ID3  / 0x20334449)
+Output #0, hls, to '/srv/fibiibot/vod/316503433957/video/playlist.m3u8':
+  Metadata:
+    encoder         : Lavf60.16.100
+  Stream #0:0: Video: h264 (High) ([27][0][0][0] / 0x001B), yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], q=2-31, 60 fps, 60 tbr, 90k tbn
+  Stream #0:1: Audio: aac (LC) ([15][0][0][0] / 0x000F), 48000 Hz, stereo, fltp, 4 kb/s
+Stream mapping:
+  Stream #0:1 -> #0:0 (copy)
+  Stream #0:0 -> #0:1 (copy)
+size=       0kB time=00:00:00.00 bitrate=   0.0kbits/s speed=N/A    size=N/A time=00:00:09.98 bitrate=N/A speed=1.71x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0000.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:00:15.98 bitrate=N/A speed=1.35x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0001.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:00:21.99 bitrate=N/A speed=1.23x    size=N/A time=00:00:27.99 bitrate=N/A speed=1.17x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0002.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:00:33.98 bitrate=N/A speed=1.14x    size=N/A time=00:00:39.98 bitrate=N/A speed=1.11x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0003.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:00:45.99 bitrate=N/A speed= 1.1x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0004.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:00:51.99 bitrate=N/A speed=1.09x    size=N/A time=00:00:57.98 bitrate=N/A speed=1.08x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0005.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:01:03.98 bitrate=N/A speed=1.07x    size=N/A time=00:01:09.99 bitrate=N/A speed=1.06x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0006.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:01:15.99 bitrate=N/A speed=1.06x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0007.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:01:21.98 bitrate=N/A speed=1.05x    size=N/A time=00:01:27.98 bitrate=N/A speed=1.05x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0008.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:01:33.99 bitrate=N/A speed=1.05x    size=N/A time=00:01:39.99 bitrate=N/A speed=1.04x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0009.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:01:45.98 bitrate=N/A speed=1.04x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0010.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:01:51.98 bitrate=N/A speed=1.04x    size=N/A time=00:01:57.99 bitrate=N/A speed=1.04x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0011.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:02:03.99 bitrate=N/A speed=1.03x    size=N/A time=00:02:09.98 bitrate=N/A speed=1.03x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0012.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:02:15.98 bitrate=N/A speed=1.03x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0013.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+size=N/A time=00:02:21.99 bitrate=N/A speed=1.03x    [hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/segment_0014.ts' for writing
+[hls @ 0x56c8ac7047c0] Opening '/srv/fibiibot/vod/316503433957/video/playlist.m3u8.tmp' for writing
+[out#0/hls @ 0x56c8ac6b1a80] video:104048kB audio:101kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
+size=N/A time=00:02:23.18 bitrate=N/A speed=1.04x    

@@ -82,7 +82,9 @@ def remove_server_header(response):
 
 @app.after_request
 def add_csp_header(response):
-    response.headers['Content-Security-Policy'] = "frame-src 'self' https://player.twitch.tv https://twitch.tv;"
+    response.headers['Content-Security-Policy'] = (
+        "frame-src 'self' https://player.twitch.tv https://twitch.tv https://clips.twitch.tv;"
+    )
     return response
 
 # ========== Error Handler ==========

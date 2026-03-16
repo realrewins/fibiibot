@@ -2,12 +2,15 @@ import os
 import time
 import subprocess
 import sys
-import signal
 import json
 import shutil
 import requests
 import threading
+import re
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+
+load_dotenv()
 
 CHANNEL = "fibii"
 BASE_DIR = "/srv/fibiibot"
@@ -15,105 +18,139 @@ VOD_DIR = os.path.join(BASE_DIR, "vod")
 LOG_DIR = os.path.join(BASE_DIR, "logs")
 LIVE_CHECK_INTERVAL = 1
 THUMBNAIL_INTERVAL = 600
-TOKEN_LIFETIME = 3500
 
 os.makedirs(VOD_DIR, exist_ok=True)
 os.makedirs(LOG_DIR, exist_ok=True)
 
 FFMPEG_PATH = shutil.which('ffmpeg') or "/usr/bin/ffmpeg"
-STREAMLINK_PATH = shutil.which('streamlink') or "/usr/local/bin/streamlink"
-TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID')
-TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET')
+TWITCH_CLIENT_ID = os.environ.get('TWITCH_CLIENT_ID', '').strip()
+TWITCH_CLIENT_SECRET = os.environ.get('TWITCH_CLIENT_SECRET', '').strip()
 
-active_processes = []
+raw_token = os.environ.get('OAUTH_TOKEN', '')
+OAUTH_TOKEN = raw_token.replace('"', '').replace("'", "").strip()
+
+GQL_CLIENT_ID = "kimne78kx3ncx6brs4gm76iz8n1864"
+
 _cached_token = None
 _token_time = 0
-
 
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
     sys.stdout.flush()
 
-
 def get_twitch_access_token():
     global _cached_token, _token_time
     now = time.time()
-    if _cached_token and (now - _token_time) < TOKEN_LIFETIME:
+    if _cached_token and (now - _token_time) < 3500:
         return _cached_token
+        
+    if not TWITCH_CLIENT_ID or not TWITCH_CLIENT_SECRET:
+        log("FEHLER: TWITCH_CLIENT_ID oder TWITCH_CLIENT_SECRET in der .env fehlen!")
+        return None
+
     url = 'https://id.twitch.tv/oauth2/token'
     params = {
         'client_id': TWITCH_CLIENT_ID,
         'client_secret': TWITCH_CLIENT_SECRET,
         'grant_type': 'client_credentials'
     }
-    for attempt in range(3):
-        try:
-            resp = requests.post(url, params=params, timeout=10)
-            if resp.status_code == 200:
-                _cached_token = resp.json().get('access_token')
-                _token_time = now
-                return _cached_token
-        except Exception as e:
-            log(f"Token-Abruf Versuch {attempt + 1}/3 fehlgeschlagen: {e}")
-            time.sleep(1)
-    return _cached_token
-
+    try:
+        resp = requests.post(url, params=params, timeout=10)
+        if resp.status_code == 200:
+            _cached_token = resp.json().get('access_token')
+            _token_time = now
+            return _cached_token
+    except Exception:
+        pass
+    return None
 
 def get_stream_info():
     global _cached_token, _token_time
     access_token = get_twitch_access_token()
     if not access_token:
         return None
+        
     headers = {
         'Client-ID': TWITCH_CLIENT_ID,
-        'Authorization': f'Bearer {access_token}'
+        'Authorization': f'Bearer {access_token}',
+        'User-Agent': 'Mozilla/5.0'
     }
     url = f'https://api.twitch.tv/helix/streams?user_login={CHANNEL}'
-    for attempt in range(2):
-        try:
-            resp = requests.get(url, headers=headers, timeout=10)
-            if resp.status_code == 200:
-                data = resp.json()
-                if data.get('data') and len(data['data']) > 0:
-                    s = data['data'][0]
-                    return {
-                        'id': str(s['id']),
-                        'title': s['title'],
-                        'game': s['game_name'],
-                        'started_at': s['started_at']
-                    }
-                return False
-            elif resp.status_code == 401:
-                _cached_token = None
-                _token_time = 0
-                access_token = get_twitch_access_token()
-                if access_token:
-                    headers['Authorization'] = f'Bearer {access_token}'
-                    continue
-                return None
-            else:
-                return None
-        except requests.exceptions.Timeout:
-            time.sleep(1)
-        except Exception:
-            return None
-    return None
-
-
-def is_stream_live_fast():
     try:
-        result = subprocess.run(
-            [STREAMLINK_PATH, '--json', f'twitch.tv/{CHANNEL}'],
-            capture_output=True, text=True, timeout=8
-        )
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
-            if 'streams' in data and len(data['streams']) > 0:
-                return True
-        return False
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get('data') and len(data['data']) > 0:
+                s = data['data'][0]
+                return {
+                    'id': str(s['id']),
+                    'title': s['title'],
+                    'game': s['game_name'],
+                    'started_at': s['started_at']
+                }
+            return False
+        elif resp.status_code == 401:
+            _cached_token = None
+            _token_time = 0
+            return None
     except Exception:
-        return False
+        return None
 
+def get_hls_url():
+    url = 'https://gql.twitch.tv/gql'
+    query = {
+        "query": "query PlaybackAccessToken($login: String!, $isLive: Boolean!, $playerType: String!) { streamPlaybackAccessToken(channelName: $login, params: {platform: \"web\", playerBackend: \"mediaplayer\", playerType: $playerType}) @include(if: $isLive) { value signature } }",
+        "variables": {
+            "isLive": True,
+            "login": CHANNEL,
+            "playerType": "site"
+        }
+    }
+    
+    headers = {
+        "Client-ID": GQL_CLIENT_ID,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Device-Id": "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
+    }
+    
+    if OAUTH_TOKEN:
+        headers["Authorization"] = f"OAuth {OAUTH_TOKEN}"
+        
+    try:
+        resp = requests.post(url, json=query, headers=headers, timeout=10)
+        
+        if resp.status_code == 401 or resp.status_code == 403:
+            log(f"FEHLER: Token abgelaufen oder abgelehnt. HTTP Code: {resp.status_code}")
+            return None
+            
+        resp_data = resp.json()
+        
+        if 'errors' in resp_data:
+            err_msg = resp_data['errors'][0].get('message', 'Unbekannt')
+            log(f"FEHLER von Twitch API: {err_msg}")
+            return None
+            
+        if not resp_data.get('data') or not resp_data['data'].get('streamPlaybackAccessToken'):
+            log("FEHLER: Konnte keine Stream-Daten abrufen (Stream offline?).")
+            return None
+            
+        token = resp_data['data']['streamPlaybackAccessToken']['value']
+        sig = resp_data['data']['streamPlaybackAccessToken']['signature']
+        master_url = f"https://usher.ttvnw.net/api/channel/hls/{CHANNEL}.m3u8?sig={sig}&token={token}&allow_source=true"
+        
+        m_resp = requests.get(master_url, headers={"User-Agent": headers["User-Agent"]}, timeout=10)
+        
+        if m_resp.status_code == 200:
+            urls = re.findall(r'(https?://[^\s]+)', m_resp.text)
+            if urls:
+                return urls[0]
+        else:
+            log(f"FEHLER: Master Playlist konnte nicht geladen werden (Code: {m_resp.status_code})")
+            
+        return None
+    except Exception as e:
+        log(f"HLS Fetch Exception: {e}")
+        return None
 
 def get_last_segment_number(stream_id):
     stream_dir = os.path.join(VOD_DIR, stream_id, "video")
@@ -130,24 +167,6 @@ def get_last_segment_number(stream_id):
                 continue
     return max_num + 1
 
-
-def get_newest_segment_time(stream_id):
-    stream_dir = os.path.join(VOD_DIR, stream_id, "video")
-    if not os.path.exists(stream_dir):
-        return 0
-    newest = 0
-    for f in os.listdir(stream_dir):
-        if f.startswith("segment_") and f.endswith('.ts'):
-            path = os.path.join(stream_dir, f)
-            try:
-                mtime = os.path.getmtime(path)
-                if mtime > newest:
-                    newest = mtime
-            except OSError:
-                continue
-    return newest
-
-
 def load_meta(stream_id):
     meta_path = os.path.join(VOD_DIR, stream_id, 'meta.json')
     if os.path.exists(meta_path):
@@ -158,7 +177,6 @@ def load_meta(stream_id):
             return {}
     return {}
 
-
 def save_meta(stream_id, meta):
     meta_dir = os.path.join(VOD_DIR, stream_id)
     os.makedirs(meta_dir, exist_ok=True)
@@ -168,14 +186,12 @@ def save_meta(stream_id, meta):
         json.dump(meta, f, ensure_ascii=False, indent=2)
     os.replace(tmp_path, meta_path)
 
-
 def thumbnail_worker(stream_id, stop_event):
     while not stop_event.is_set():
         try:
             stream_dir = os.path.join(VOD_DIR, stream_id, 'video')
             if os.path.exists(stream_dir):
-                segments = [f for f in os.listdir(stream_dir)
-                            if f.startswith('segment_') and f.endswith('.ts')]
+                segments = [f for f in os.listdir(stream_dir) if f.startswith('segment_') and f.endswith('.ts')]
                 if segments:
                     segments.sort()
                     seg_path = os.path.join(stream_dir, segments[-1])
@@ -188,48 +204,113 @@ def thumbnail_worker(stream_id, stop_event):
             pass
         stop_event.wait(THUMBNAIL_INTERVAL)
 
-
-def graceful_kill(proc, name="Prozess", timeout=5):
-    if proc is None:
-        return
-    try:
-        if proc.poll() is not None:
-            return
-        proc.terminate()
-        try:
-            proc.wait(timeout=timeout)
-            return
-        except subprocess.TimeoutExpired:
-            pass
-        proc.kill()
-        proc.wait(timeout=3)
-    except Exception:
-        pass
-
-
 def first_segment_watcher(stream_id, stop_event):
     stream_dir = os.path.join(VOD_DIR, stream_id, 'video')
     while not stop_event.is_set():
         if os.path.exists(stream_dir):
-            segments = [f for f in os.listdir(stream_dir)
-                        if f.startswith('segment_') and f.endswith('.ts')]
+            segments = [f for f in os.listdir(stream_dir) if f.startswith('segment_') and f.endswith('.ts')]
             if segments:
                 now = datetime.now(timezone.utc).isoformat()
                 meta = load_meta(stream_id)
                 meta['started_at'] = now
                 save_meta(stream_id, meta)
-                log(f"Erstes Segment da -> started_at = {now}")
+                log(f"Erstes Segment da, Startzeit: {now}")
                 return
         stop_event.wait(0.5)
 
+def update_playlist(stream_dir, segments_data, is_ended=False):
+    playlist_path = os.path.join(stream_dir, 'index.m3u8')
+    temp_path = playlist_path + '.tmp'
+    try:
+        target_duration = 10
+        max_d = 0.0
+        for _, d_str in segments_data:
+            try:
+                val = float(d_str.split(':')[1].split(',')[0])
+                if val > max_d:
+                    max_d = val
+            except Exception:
+                pass
+        if max_d > 0:
+            target_duration = int(max_d + 1)
+
+        with open(temp_path, 'w') as f:
+            f.write("#EXTM3U\n")
+            f.write("#EXT-X-VERSION:6\n")
+            f.write(f"#EXT-X-TARGETDURATION:{target_duration}\n")
+            f.write("#EXT-X-MEDIA-SEQUENCE:0\n")
+            f.write("#EXT-X-INDEPENDENT-SEGMENTS\n")
+            f.write("#EXT-X-PLAYLIST-TYPE:EVENT\n")
+            for local_seg, duration_str in segments_data:
+                f.write(f"{duration_str}\n")
+                f.write(f"{local_seg}\n")
+            if is_ended:
+                f.write("#EXT-X-ENDLIST\n")
+        os.replace(temp_path, playlist_path)
+    except Exception:
+        pass
+
+def download_worker(m3u8_url, stream_id, stop_event):
+    stream_dir = os.path.join(VOD_DIR, stream_id, 'video')
+    os.makedirs(stream_dir, exist_ok=True)
+    downloaded_segments = set()
+    segments_data = []
+    segment_counter = get_last_segment_number(stream_id)
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+    while not stop_event.is_set():
+        try:
+            resp = requests.get(m3u8_url, headers=headers, timeout=10)
+            if resp.status_code != 200:
+                break
+            
+            lines = resp.text.split('\n')
+            base_url = m3u8_url.rsplit('/', 1)[0]
+            
+            for i in range(len(lines)):
+                if lines[i].startswith('#EXTINF:'):
+                    duration_line = lines[i]
+                    segment_name = lines[i+1].strip()
+                    
+                    if segment_name and segment_name not in downloaded_segments:
+                        if segment_name.startswith('http'):
+                            seg_url = segment_name
+                        else:
+                            seg_url = f"{base_url}/{segment_name}"
+                            
+                        try:
+                            ts_data = requests.get(seg_url, headers=headers, timeout=10).content
+                            local_seg_name = f"segment_{segment_counter:06d}.ts"
+                            file_path = os.path.join(stream_dir, local_seg_name)
+                            
+                            with open(file_path, "wb") as f:
+                                f.write(ts_data)
+                                
+                            downloaded_segments.add(segment_name)
+                            segments_data.append((local_seg_name, duration_line))
+                            segment_counter += 1
+                        except Exception:
+                            pass
+            
+            update_playlist(stream_dir, segments_data, is_ended=False)
+            
+            if len(downloaded_segments) > 2000:
+                downloaded_segments.clear()
+                
+            time.sleep(1)
+        except Exception:
+            break
+            
+    update_playlist(stream_dir, segments_data, is_ended=True)
 
 def record_stream(stream_info):
-    global active_processes
     stream_id = stream_info['id']
     stream_dir = os.path.join(VOD_DIR, stream_id, 'video')
     os.makedirs(stream_dir, exist_ok=True)
 
-    start_number = get_last_segment_number(stream_id)
     meta = load_meta(stream_id)
     if not meta:
         meta = stream_info.copy()
@@ -243,213 +324,48 @@ def record_stream(stream_info):
         meta['outages'] = []
         save_meta(stream_id, meta)
 
-    if 'outages' not in meta:
-        meta['outages'] = []
-        save_meta(stream_id, meta)
+    hls_url = get_hls_url()
+    if not hls_url:
+        return None, None
 
-    playlist_path = os.path.join(stream_dir, 'playlist.m3u8')
-    log(f"Starte Aufnahme: {CHANNEL} (ID: {stream_id}) ab Segment {start_number}")
+    log(f"Starte Aufnahme: {CHANNEL} (ID: {stream_id})")
 
-    sl_log = open(os.path.join(LOG_DIR, f'streamlink_{stream_id}.log'), 'a')
-    ff_log = open(os.path.join(LOG_DIR, f'ffmpeg_{stream_id}.log'), 'a')
+    stop_event = threading.Event()
+    
+    thread = threading.Thread(target=download_worker, args=(hls_url, stream_id, stop_event))
+    thread.start()
+    
+    threading.Thread(target=thumbnail_worker, args=(stream_id, stop_event), daemon=True).start()
+    threading.Thread(target=first_segment_watcher, args=(stream_id, stop_event), daemon=True).start()
 
-    # Shell-Pipeline: Streamlink | FFmpeg
-    # Der Kernel verwaltet die Pipe komplett – Python hat keine Referenz darauf
-    segment_pattern = os.path.join(stream_dir, 'segment_%04d.ts')
-    shell_cmd = (
-        f'{STREAMLINK_PATH} twitch.tv/{CHANNEL} best '
-        f'--twitch-disable-ads --hls-live-edge 2 -O '
-        f'| {FFMPEG_PATH} -i pipe:0 -c copy -f hls '
-        f'-hls_time 10 -hls_list_size 0 '
-        f'-hls_flags append_list+independent_segments '
-        f'-hls_segment_filename {segment_pattern} '
-        f'-start_number {start_number} '
-        f'{playlist_path}'
-    )
+    return thread, stop_event
 
-    try:
-        proc = subprocess.Popen(
-            shell_cmd,
-            shell=True,
-            stdout=subprocess.DEVNULL,
-            stderr=ff_log,
-            preexec_fn=os.setsid  # Eigene Prozessgruppe für sauberes Cleanup
-        )
-
-        active_processes = [proc]
-
-        stop_event = threading.Event()
-
-        threading.Thread(
-            target=thumbnail_worker, args=(stream_id, stop_event), daemon=True
-        ).start()
-        threading.Thread(
-            target=first_segment_watcher, args=(stream_id, stop_event), daemon=True
-        ).start()
-
-        return proc, stop_event, sl_log, ff_log
-
-    except Exception as e:
-        log(f"Kritischer Fehler beim Prozess-Start: {e}")
-        sl_log.close()
-        ff_log.close()
-        return None, None, None, None
-
-
-def cleanup_recording(proc, stop_event, sl_log, ff_log):
+def finish_stream(current_stream_id, thread, stop_event):
     if stop_event:
         stop_event.set()
-    if proc is not None:
-        try:
-            if proc.poll() is None:
-                # Ganze Prozessgruppe killen (Streamlink + FFmpeg)
-                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-                try:
-                    proc.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-                    proc.wait(timeout=3)
-        except Exception:
-            pass
-    active_processes.clear()
-    for f in [sl_log, ff_log]:
-        if f:
-            try:
-                f.close()
-            except Exception:
-                pass
-
-
-def log_outage(stream_id, reason):
-    meta = load_meta(stream_id)
-    if 'outages' not in meta:
-        meta['outages'] = []
-    outage = {
-        'timestamp': time.time(),
-        'time_readable': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'segment': get_last_segment_number(stream_id),
-        'reason': reason
-    }
-    meta['outages'].append(outage)
-    save_meta(stream_id, meta)
-    log(f"OUTAGE protokolliert: {reason}")
-
-
-def finish_stream(current_stream_id, proc, stop_event, sl_log, ff_log):
+    if thread:
+        thread.join()
     meta = load_meta(current_stream_id)
     meta['ended_at'] = datetime.now(timezone.utc).isoformat()
     save_meta(current_stream_id, meta)
-    cleanup_recording(proc, stop_event, sl_log, ff_log)
-    log(f"Stream beendet: {current_stream_id} um {meta['ended_at']}")
-
+    log(f"Stream beendet: {current_stream_id}")
 
 def monitor():
-    global active_processes
-    proc = None
+    current_thread = None
     stop_event = None
-    sl_log = None
-    ff_log = None
     current_stream_id = None
-    restart_count = 0
-    max_restarts_per_minute = 10
-    restart_timestamps = []
-    last_streamlink_check = 0
-    streamlink_check_interval = 3
-
-    def kill_all():
-        log("Beende alle Prozesse...")
-        cleanup_recording(proc, stop_event, sl_log, ff_log)
-
-    signal.signal(signal.SIGINT, lambda s, f: (kill_all(), sys.exit(0)))
-    signal.signal(signal.SIGTERM, lambda s, f: (kill_all(), sys.exit(0)))
-
-    log(f"Monitoring aktiv für: {CHANNEL} (Check alle {LIVE_CHECK_INTERVAL}s)")
+    
+    log(f"Monitoring aktiv fuer: {CHANNEL}")
 
     while True:
         try:
-            now = time.time()
-            is_recording = proc is not None
+            info = get_stream_info()
+            stream_is_live = (info is not False and info is not None)
 
-            stream_is_live = False
-            info = None
-
-            if not is_recording and (now - last_streamlink_check) >= streamlink_check_interval:
-                last_streamlink_check = now
-                if is_stream_live_fast():
-                    log("Streamlink: Stream erkannt! Hole API-Info...")
-                    stream_is_live = True
-                    info = get_stream_info()
-                    if not info or info is False:
-                        info = get_stream_info()
-                    if not info or info is False:
-                        time.sleep(2)
-                        info = get_stream_info()
-                    if not info or info is False:
-                        log("API noch nicht ready, warte...")
-                        time.sleep(LIVE_CHECK_INTERVAL)
-                        continue
-
-            if not stream_is_live:
-                info = get_stream_info()
-                if info is None:
-                    time.sleep(LIVE_CHECK_INTERVAL)
-                    continue
-                stream_is_live = (info is not False)
-
-            if stream_is_live and info and info is not False:
-                needs_restart = False
-                restart_reason = None
-
-                if proc is None:
-                    needs_restart = True
-                    restart_reason = "Erststart"
-                elif proc.poll() is not None:
-                    rc = proc.returncode
-                    if rc == 0 or rc == -13 or rc == 141:
-                        # 0 = sauber, -13/141 = SIGPIPE (normal bei Stream-Ende)
-                        log(f"Pipeline beendet (code={rc}), Stream-Ende erkannt.")
-                        finish_stream(current_stream_id, proc, stop_event, sl_log, ff_log)
-                        proc, stop_event, sl_log, ff_log, current_stream_id = None, None, None, None, None
-                        restart_count = 0
-                        restart_timestamps.clear()
-                        time.sleep(LIVE_CHECK_INTERVAL)
-                        continue
-                    else:
-                        needs_restart = True
-                        restart_reason = f"Pipeline crashed (code={rc})"
-                # KEIN Segment-Health-Check mehr – Streamlink/FFmpeg wissen selbst
-                # wann der Stream tot ist. Unnötige Restarts verursachen Lücken.
-
-                if needs_restart:
-                    now_ts = time.time()
-                    restart_timestamps = [t for t in restart_timestamps if now_ts - t < 60]
-                    if len(restart_timestamps) >= max_restarts_per_minute:
-                        log(f"WARNUNG: {max_restarts_per_minute} Restarts in 1 Min. Warte 30s...")
-                        time.sleep(30)
-                        restart_timestamps.clear()
-
-                    if proc is not None:
-                        if restart_reason != "Erststart":
-                            log_outage(current_stream_id or info['id'], restart_reason)
-                        log(f"Neustart nötig: {restart_reason}")
-                        cleanup_recording(proc, stop_event, sl_log, ff_log)
-                        time.sleep(2)
-
+            if stream_is_live and info:
+                if not current_thread:
                     current_stream_id = info['id']
-                    result = record_stream(info)
-                    proc = result[0]
-                    stop_event = result[1]
-                    sl_log = result[2]
-                    ff_log = result[3]
-
-                    if proc is None:
-                        log("Aufnahme-Start fehlgeschlagen, versuche erneut...")
-                        time.sleep(2)
-                    else:
-                        restart_timestamps.append(now_ts)
-                        restart_count += 1
-                        log(f"Aufnahme läuft (Restart #{restart_count})" if restart_count > 1
-                            else "Aufnahme gestartet.")
+                    current_thread, stop_event = record_stream(info)
                 else:
                     meta = load_meta(current_stream_id)
                     if meta.get('game') != info['game'] or meta.get('title') != info['title']:
@@ -466,24 +382,18 @@ def monitor():
                             'timestamp': time.time()
                         })
                         save_meta(current_stream_id, meta)
-
             else:
-                if proc is not None:
-                    log("API: Stream offline.")
-                    finish_stream(current_stream_id, proc, stop_event, sl_log, ff_log)
-                    proc, stop_event, sl_log, ff_log, current_stream_id = None, None, None, None, None
-                    restart_count = 0
-                    restart_timestamps.clear()
+                if current_thread:
+                    log("Stream offline API Meldung.")
+                    finish_stream(current_stream_id, current_thread, stop_event)
+                    current_thread = None
+                    stop_event = None
+                    current_stream_id = None
 
             time.sleep(LIVE_CHECK_INTERVAL)
 
-        except Exception as e:
-            log(f"Monitor Fehler: {e}")
-            import traceback
-            traceback.print_exc()
-            sys.stdout.flush()
+        except Exception:
             time.sleep(LIVE_CHECK_INTERVAL)
-
 
 if __name__ == "__main__":
     monitor()

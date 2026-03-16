@@ -64,11 +64,6 @@ def parse_m3u8(playlist_path):
     return segments
 
 def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
-    """
-    Schneidet einen Clip.
-    Bei HLS: Parst die Playlist, concateniert nur die nötigen Segmente, schneidet exakt.
-    Bei MP4: Normales Input-Seeking.
-    """
     start = float(start)
     duration = float(duration)
 
@@ -77,31 +72,26 @@ def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
         if not segments:
             raise Exception("Keine Segmente in Playlist gefunden")
 
-        # Berechne welche Segmente wir brauchen
         cumulative = 0.0
         start_idx = 0
         end_idx = len(segments) - 1
 
-        # Finde Start-Segment
         for i, (seg_dur, seg_path) in enumerate(segments):
             if cumulative + seg_dur > start:
                 start_idx = i
                 break
             cumulative += seg_dur
 
-        # Offset innerhalb des Start-Segments
         offset_in_segment = start - cumulative
 
-        # Finde End-Segment (mit Puffer)
         clip_end = start + duration
         cumulative2 = 0.0
         for i, (seg_dur, seg_path) in enumerate(segments):
             cumulative2 += seg_dur
-            if cumulative2 >= clip_end + 10:  # 10s Puffer
+            if cumulative2 >= clip_end + 10:
                 end_idx = i
                 break
 
-        # Erstelle concat-Liste mit den nötigen Segmenten
         needed = segments[start_idx:end_idx + 1]
 
         concat_file = os.path.join(os.path.dirname(out_path), 'concat.txt')
@@ -110,7 +100,6 @@ def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
                 for seg_dur, seg_path in needed:
                     f.write(f"file '{seg_path}'\n")
 
-            # Schneide aus den concatenierten Segmenten
             cmd = [
                 'ffmpeg', '-y',
                 '-f', 'concat',
@@ -124,20 +113,29 @@ def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
                 '-c:a', 'aac',
                 '-avoid_negative_ts', 'make_zero',
                 '-map_metadata', '-1',
+                '-movflags', '+faststart',
                 out_path
             ]
 
-            print(f"[CLIP] start={start}, duration={duration}, segments={start_idx}-{end_idx}, offset={offset_in_segment}")
             result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0 and os.path.exists(out_path):
+                thumb_path = os.path.splitext(out_path)[0] + '.jpg'
+                subprocess.run([
+                    'ffmpeg', '-y', 
+                    '-ss', '1', 
+                    '-i', out_path, 
+                    '-vframes', '1', 
+                    '-q:v', '2', 
+                    thumb_path
+                ], capture_output=True)
+                
             if result.returncode != 0:
-                print(f"[CLIP] FFmpeg error: {result.stderr[-500:]}")
                 raise subprocess.CalledProcessError(result.returncode, cmd)
-            print(f"[CLIP] OK, size={os.path.getsize(out_path) if os.path.exists(out_path) else 0}")
         finally:
             if os.path.exists(concat_file):
                 os.remove(concat_file)
     else:
-        # MP4: normales Input-Seeking
         cmd = [
             'ffmpeg', '-y',
             '-ss', str(start),
@@ -149,9 +147,35 @@ def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
             '-c:a', 'aac',
             '-avoid_negative_ts', 'make_zero',
             '-map_metadata', '-1',
+            '-movflags', '+faststart',
             out_path
         ]
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0 and os.path.exists(out_path):
+            thumb_path = os.path.splitext(out_path)[0] + '.jpg'
+            subprocess.run([
+                'ffmpeg', '-y', 
+                '-ss', '1', 
+                '-i', out_path, 
+                '-vframes', '1', 
+                '-q:v', '2', 
+                thumb_path
+            ], capture_output=True)
+
+def get_real_hls_duration(stream_id):
+    index_path = os.path.join(VOD_FOLDER, stream_id, 'video', 'index.m3u8')
+    if not os.path.exists(index_path):
+        return 0
+    duration = 0.0
+    try:
+        with open(index_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.startswith('#EXTINF:'):
+                    duration += float(line.split(':')[1].split(',')[0])
+    except Exception:
+        pass
+    return int(duration)
 
 def render_clip_background(clip_dir, start, duration, stream_dir):
     out_path = os.path.join(clip_dir, 'clip.mp4')

@@ -283,98 +283,185 @@ function updateProgressFromEvent(e) {
 }
 
 function setupPlayerControls() {
-    video.addEventListener('durationchange', () => {
-        if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
-            currentVideoDuration = video.duration;
+  video.addEventListener('durationchange', () => {
+    if (video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
+      currentVideoDuration = video.duration;
+    }
+  });
+
+  video.addEventListener('timeupdate', () => {
+    if (isDragging) return;
+
+    const curr = video.currentTime;
+    let percent = (curr / currentVideoDuration) * 100;
+
+    progressBar.style.width = `${Math.min(100, percent)}%`;
+    const dot = document.getElementById('progressDot');
+    if (dot) dot.style.left = `${Math.min(100, percent)}%`;
+
+    timeDisplay.innerText = `${formatClipTime(curr)} / ${formatClipTime(currentVideoDuration)}`;
+  });
+
+  video.addEventListener('progress', () => {
+    if (!currentVideoDuration || currentVideoDuration === 0) return;
+    if (video.buffered.length > 0) {
+      const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+      const percent = (bufferedEnd / currentVideoDuration) * 100;
+      if (progressBuffer) progressBuffer.style.width = `${Math.min(100, percent)}%`;
+    }
+  });
+
+  playPauseBtn.addEventListener('click', togglePlay);
+  bigPlayBtn.addEventListener('click', togglePlay);
+  video.addEventListener('click', togglePlay);
+
+  video.addEventListener('play', () => {
+    bigPlayBtn.style.display = 'none';
+    updatePlayPauseIcon();
+  });
+
+  video.addEventListener('pause', () => {
+    bigPlayBtn.style.display = 'flex';
+    updatePlayPauseIcon();
+  });
+
+  muteBtn.addEventListener('click', () => {
+    video.muted = !video.muted;
+    volumeSlider.value = video.muted ? 0 : (video.volume || 1);
+    updateMuteIcon();
+  });
+
+  volumeSlider.addEventListener('input', (e) => {
+    video.volume = e.target.value;
+    video.muted = video.volume === 0;
+    updateMuteIcon();
+  });
+
+  progressContainer.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    updateProgressFromEvent(e);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) updateProgressFromEvent(e);
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      videoContainer.requestFullscreen().catch(() => { });
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  // Tastatur-Steuerung: Space = Pause/Play, Pfeiltasten = 5s vor/zurück
+  document.addEventListener('keydown', (e) => {
+    if (!video || !currentVideoId) return;
+    // Nicht auslösen wenn man in einem Input-Feld tippt
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.code === 'Space') {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.code === 'ArrowRight') {
+      e.preventDefault();
+      video.currentTime = Math.min(video.currentTime + 5, currentVideoDuration);
+    } else if (e.code === 'ArrowLeft') {
+      e.preventDefault();
+      video.currentTime = Math.max(video.currentTime - 5, 0);
+    }
+  });
+
+  video.addEventListener('dblclick', () => {
+    if (!document.fullscreenElement) {
+      videoContainer.requestFullscreen().catch(() => { });
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  let isSpaceDown = false;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    switch (e.code) {
+      case 'Space':
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isSpaceDown) {
+          isSpaceDown = true;
+          video.playbackRate = 2.0;
         }
-    });
-
-    video.addEventListener('timeupdate', () => {
-        if (isDragging) return;
-        
-        const curr = video.currentTime;
-        let percent = (curr / currentVideoDuration) * 100;
-        
-        progressBar.style.width = `${Math.min(100, percent)}%`;
-        const dot = document.getElementById('progressDot');
-        if (dot) dot.style.left = `${Math.min(100, percent)}%`;
-        
-        timeDisplay.innerText = `${formatClipTime(curr)} / ${formatClipTime(currentVideoDuration)}`;
-    });
-
-    video.addEventListener('progress', () => {
-        if (!currentVideoDuration || currentVideoDuration === 0) return;
-        if (video.buffered.length > 0) {
-            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-            const percent = (bufferedEnd / currentVideoDuration) * 100;
-            if (progressBuffer) progressBuffer.style.width = `${Math.min(100, percent)}%`;
-        }
-    });
-
-    playPauseBtn.addEventListener('click', togglePlay);
-    bigPlayBtn.addEventListener('click', togglePlay);
-    video.addEventListener('click', togglePlay);
-    
-    video.addEventListener('play', () => { 
-        bigPlayBtn.style.display = 'none'; 
-        updatePlayPauseIcon(); 
-    });
-    
-    video.addEventListener('pause', () => { 
-        bigPlayBtn.style.display = 'flex'; 
-        updatePlayPauseIcon(); 
-    });
-
-    muteBtn.addEventListener('click', () => {
+        break;
+      case 'Space':
+        e.preventDefault();
+        e.stopPropagation();
+        togglePlay();
+        break;
+      case 'KeyM':
+        e.preventDefault();
+        e.stopPropagation();
         video.muted = !video.muted;
-        volumeSlider.value = video.muted ? 0 : (video.volume || 1);
-        updateMuteIcon();
-    });
-
-    volumeSlider.addEventListener('input', (e) => {
-        video.volume = e.target.value;
-        video.muted = video.volume === 0;
-        updateMuteIcon();
-    });
-
-    progressContainer.addEventListener('mousedown', (e) => { 
-        isDragging = true; 
-        updateProgressFromEvent(e); 
-    });
-    
-    document.addEventListener('mousemove', (e) => { 
-        if (isDragging) updateProgressFromEvent(e); 
-    });
-    
-    document.addEventListener('mouseup', () => { 
-        isDragging = false; 
-    });
-
-    fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            videoContainer.requestFullscreen().catch(() => {});
+        if (video.muted) {
+          volumeSlider.value = 0;
         } else {
-            document.exitFullscreen();
+          volumeSlider.value = video.volume || 1;
         }
-    });
-
-    // Tastatur-Steuerung: Space = Pause/Play, Pfeiltasten = 5s vor/zurück
-    document.addEventListener('keydown', (e) => {
-        if (!video || !currentVideoId) return;
-        // Nicht auslösen wenn man in einem Input-Feld tippt
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-        if (e.code === 'Space') {
-            e.preventDefault();
-            togglePlay();
-        } else if (e.code === 'ArrowRight') {
-            e.preventDefault();
-            video.currentTime = Math.min(video.currentTime + 5, currentVideoDuration);
-        } else if (e.code === 'ArrowLeft') {
-            e.preventDefault();
-            video.currentTime = Math.max(video.currentTime - 5, 0);
+        updateMuteIcon();
+        break;
+      case 'KeyF':
+        e.preventDefault();
+        e.stopPropagation();
+        if (!document.fullscreenElement) {
+          videoContainer.requestFullscreen().catch(() => { });
+        } else {
+          document.exitFullscreen();
         }
-    });
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        e.stopPropagation();
+        if (video.duration) video.currentTime = Math.min(video.duration, video.currentTime + 5);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        e.stopPropagation();
+        if (video.duration) video.currentTime = Math.max(0, video.currentTime - 5);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        e.stopPropagation();
+        video.volume = Math.min(1, video.volume + 0.1);
+        video.muted = false;
+        volumeSlider.value = video.volume;
+        updateMuteIcon();
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        e.stopPropagation();
+        video.volume = Math.max(0, video.volume - 0.1);
+        if (video.volume === 0) video.muted = true;
+        volumeSlider.value = video.volume;
+        updateMuteIcon();
+        break;
+    }
+  }, true);
+
+  document.addEventListener('keyup', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.code === 'Space') {
+      e.preventDefault();
+      e.stopPropagation();
+      isSpaceDown = false;
+      video.playbackRate = 1.0;
+    }
+  }, true);
 }
 
 function togglePlay() {

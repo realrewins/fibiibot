@@ -12,6 +12,7 @@ const volumeSlider = document.getElementById('volumeSlider');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
 const progressContainer = document.getElementById('progressContainer');
 const progressBar = document.getElementById('progressBar');
+const progressBuffer = document.getElementById('progressBuffer');
 const timeDisplay = document.getElementById('timeDisplay');
 const bigPlayBtn = document.getElementById('bigPlayBtn');
 const videoContainer = document.getElementById('videoContainer');
@@ -21,20 +22,20 @@ window.addEventListener('load', async () => {
         const res = await fetch(`/api/clip/${clipId}/info`);
         if (!res.ok) throw new Error('Clip not found');
         const data = await res.json();
-        
+
         document.getElementById('clipTitle').innerText = data.name || 'Unbekannter Clip';
         document.getElementById('clipCreator').innerHTML = `<i class="fas fa-user"></i> ${data.creator || 'Unbekannt'}`;
-        
+
         if (data.created_at) {
             const dateObj = new Date(data.created_at);
             const formatted = dateObj.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             document.getElementById('clipDate').innerHTML = `<i class="fas fa-clock"></i> ${formatted}`;
         }
-        
+
         clipStart = parseFloat(data.start);
         clipEnd = parseFloat(data.end);
         clipDuration = clipEnd - clipStart;
-        
+
         document.getElementById('clipContainer').style.display = 'block';
         initPlayer(data);
         setupControls();
@@ -45,12 +46,12 @@ window.addEventListener('load', async () => {
 
 function initPlayer(data) {
     const url = data.video_url;
-    
+
     if (!url) {
         alert('Video-Quelldatei nicht gefunden.');
         return;
     }
-    
+
     if (data.video_type === 'mp4') {
         video.src = url;
         video.currentTime = clipStart;
@@ -98,14 +99,14 @@ function updateProgressFromEvent(e) {
     let pos = (e.clientX - rect.left) / rect.width;
     if (pos < 0) pos = 0;
     if (pos > 1) pos = 1;
-    
+
     let newTime = clipStart + (pos * clipDuration);
     video.currentTime = newTime;
-    
+
     progressBar.style.width = `${pos * 100}%`;
     const dot = document.getElementById('progressDot');
-    if(dot) dot.style.left = `${pos * 100}%`;
-    
+    if (dot) dot.style.left = `${pos * 100}%`;
+
     let currentRelTime = newTime - clipStart;
     if (currentRelTime < 0) currentRelTime = 0;
     timeDisplay.innerText = `${formatTime(currentRelTime)} / ${formatTime(clipDuration)}`;
@@ -117,24 +118,35 @@ function setupControls() {
     video.addEventListener('timeupdate', () => {
         if (isDragging) return;
         let currentRelTime = video.currentTime - clipStart;
-        
+
         if (video.currentTime >= clipEnd) {
             video.currentTime = clipStart;
             currentRelTime = 0;
-            video.play().catch(()=>{});
+            video.play().catch(() => { });
         }
-        
+
         if (currentRelTime < 0) currentRelTime = 0;
-        
+
         let percent = (currentRelTime / clipDuration) * 100;
         if (percent > 100) percent = 100;
         if (percent < 0) percent = 0;
-        
+
         progressBar.style.width = `${percent}%`;
         const dot = document.getElementById('progressDot');
-        if(dot) dot.style.left = `${percent}%`;
-        
+        if (dot) dot.style.left = `${percent}%`;
+
         timeDisplay.innerText = `${formatTime(currentRelTime)} / ${formatTime(clipDuration)}`;
+    });
+
+    video.addEventListener('progress', () => {
+        if (!clipDuration || clipDuration === 0) return;
+        if (video.buffered.length > 0) {
+            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+            const bufferedStart = Math.max(clipStart, 0);
+            const bufferedWithinClip = Math.min(bufferedEnd, clipEnd) - bufferedStart;
+            const percent = (bufferedWithinClip / clipDuration) * 100;
+            if (progressBuffer) progressBuffer.style.width = `${Math.min(100, percent)}%`;
+        }
     });
 
     playPauseBtn.addEventListener('click', togglePlay);
@@ -145,7 +157,7 @@ function setupControls() {
         bigPlayBtn.style.display = 'none';
         updatePlayPauseIcon();
     });
-    
+
     video.addEventListener('pause', () => {
         bigPlayBtn.style.display = 'flex';
         updatePlayPauseIcon();
@@ -188,7 +200,7 @@ function setupControls() {
 
     fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
-            videoContainer.requestFullscreen().catch(()=>{});
+            videoContainer.requestFullscreen().catch(() => { });
         } else {
             document.exitFullscreen();
         }
@@ -201,11 +213,101 @@ function setupControls() {
             fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
         }
     });
+
+    video.addEventListener('dblclick', () => {
+        if (!document.fullscreenElement) {
+            videoContainer.requestFullscreen().catch(() => { });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    // ========== Tastatursteuerung (Leertaste) ==========
+    let spacePressed = false;
+    let spaceTimer = null;
+
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        switch (e.code) {
+            case 'Space':
+                e.preventDefault();
+                e.stopPropagation();
+                if (!spacePressed) {
+                    spacePressed = true;
+                    spaceTimer = setTimeout(() => {
+                        if (spacePressed) {
+                            video.playbackRate = 2.0;
+                        }
+                    }, 200);
+                }
+                break;
+            case 'KeyM':
+                e.preventDefault();
+                e.stopPropagation();
+                video.muted = !video.muted;
+                volumeSlider.value = video.muted ? 0 : (video.volume || 1);
+                updateMuteIcon();
+                break;
+            case 'KeyF':
+                e.preventDefault();
+                e.stopPropagation();
+                if (!document.fullscreenElement) {
+                    videoContainer.requestFullscreen().catch(() => { });
+                } else {
+                    document.exitFullscreen();
+                }
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                e.stopPropagation();
+                video.currentTime = Math.min(video.currentTime + 5, clipEnd);
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                e.stopPropagation();
+                video.currentTime = Math.max(video.currentTime - 5, clipStart);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                e.stopPropagation();
+                video.volume = Math.min(1, video.volume + 0.1);
+                video.muted = false;
+                volumeSlider.value = video.volume;
+                updateMuteIcon();
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                e.stopPropagation();
+                video.volume = Math.max(0, video.volume - 0.1);
+                if (video.volume === 0) video.muted = true;
+                volumeSlider.value = video.volume;
+                updateMuteIcon();
+                break;
+        }
+    }, true);
+
+    document.addEventListener('keyup', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.code === 'Space') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (spacePressed) {
+                clearTimeout(spaceTimer);
+                if (video.playbackRate !== 2.0) {
+                    togglePlay();
+                }
+                video.playbackRate = 1.0;
+                spacePressed = false;
+            }
+        }
+    }, true);
 }
 
 function togglePlay() {
     if (video.paused) {
-        video.play().catch(()=>{});
+        video.play().catch(() => { });
     } else {
         video.pause();
     }
@@ -233,24 +335,24 @@ function copyClipLink() {
     const text = window.location.href;
     navigator.clipboard.writeText(text).then(() => {
         showToast('Clip-Link in die Zwischenablage kopiert!');
-    }).catch(()=>{});
+    }).catch(() => { });
 }
 
 async function downloadClipSegment() {
     const btn = document.getElementById('downloadClipBtn');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Bereite vor...';
     btn.disabled = true;
-    
+
     try {
         const res = await fetch(`/api/clip/${clipId}/status`);
         const data = await res.json();
         if (!data.ready) {
             showToast('Clip muss neu gerendert werden (älter als 24h). Das dauert kurz...', 5000);
         }
-    } catch(e) {}
-    
+    } catch (e) { }
+
     window.location.href = `/api/clip/${clipId}/download`;
-    
+
     setTimeout(() => {
         btn.innerHTML = '<i class="fas fa-download"></i> Herunterladen';
         btn.disabled = false;

@@ -9,12 +9,26 @@ import re
 import threading
 import time
 import tempfile
+import logging
 from flask import Blueprint, jsonify, send_from_directory, request, send_file, session
 from datetime import datetime
 from app.decorators import login_required
 from app.config import VOD_FOLDER, TWITCH_CLIENT_ID
 from app.twitch_api import get_twitch_access_token
 from app.auth import validate_csrf
+
+# Absoluter Pfad zu ffmpeg (angepasst an dein System)
+FFMPEG_PATH = '/usr/bin/ffmpeg'
+
+# Logger einrichten – schreibt in eine Datei, damit wir auch im Thread sehen, was passiert
+log_file = os.path.join(os.path.dirname(__file__), '..', 'logs', 'vod_clips.log')
+os.makedirs(os.path.dirname(log_file), exist_ok=True)
+logging.basicConfig(
+    filename=log_file,
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 vod_bp = Blueprint('vod', __name__, url_prefix='/api')
 
@@ -24,26 +38,45 @@ def cleanup_old_clips():
         if not os.path.exists(clips_base): return
         now = time.time()
         for c in os.listdir(clips_base):
-            mp4_path = os.path.join(clips_base, c, 'clip.mp4')
+            clip_dir = os.path.join(clips_base, c)
+            mp4_path = os.path.join(clip_dir, 'clip.mp4')
             if os.path.exists(mp4_path):
                 if os.path.getmtime(mp4_path) < now - (24 * 3600):
                     os.remove(mp4_path)
-    except Exception:
-        pass
+                    # auch thumbnail und meta löschen?
+                    thumb = os.path.join(clip_dir, 'thumbnail.png')
+                    if os.path.exists(thumb): os.remove(thumb)
+                    meta = os.path.join(clip_dir, 'meta.json')
+                    if os.path.exists(meta): os.remove(meta)
+                    # Verzeichnis löschen, wenn leer
+                    try:
+                        os.rmdir(clip_dir)
+                    except:
+                        pass
+    except Exception as e:
+        logger.error(f"cleanup_old_clips Fehler: {e}")
 
 def get_input_video(stream_dir):
+    """
+    Durchsucht stream_dir nach einer Videoquelle.
+    Gibt (pfad, typ) zurück oder (None, None).
+    """
+    # Mögliche Pfade (angepasst an deine tatsächliche Struktur)
     checks = [
-        ('playlist.m3u8', 'hls'),
-        ('index.m3u8', 'hls'),
         ('video/playlist.m3u8', 'hls'),
         ('video/index.m3u8', 'hls'),
-        (f'{os.path.basename(stream_dir)}.mp4', 'mp4'),
+        ('playlist.m3u8', 'hls'),
+        ('index.m3u8', 'hls'),
         ('video.mp4', 'mp4'),
+        (f'{os.path.basename(stream_dir)}.mp4', 'mp4'),
+        ('output.mp4', 'mp4'),  # Fallback
     ]
     for path, typ in checks:
         full = os.path.join(stream_dir, path)
         if os.path.exists(full):
+            logger.info(f"Gefundene Quelle: {full} (Typ: {typ})")
             return full, typ
+    logger.error(f"Keine Videoquelle gefunden in {stream_dir}")
     return None, None
 
 def parse_m3u8(playlist_path):
@@ -52,22 +85,40 @@ def parse_m3u8(playlist_path):
     playlist_dir = os.path.dirname(playlist_path)
     current_duration = 0.0
 
-    with open(playlist_path, 'r') as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith('#EXTINF:'):
-                current_duration = float(line.split(':')[1].rstrip(','))
-            elif line and not line.startswith('#'):
-                seg_path = os.path.join(playlist_dir, line)
-                segments.append((current_duration, seg_path))
-
+    try:
+        with open(playlist_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('#EXTINF:'):
+                    # Format: #EXTINF:duration,title
+                    parts = line.split(':')[1].split(',', 1)
+                    current_duration = float(parts[0])
+                elif line and not line.startswith('#'):
+                    # Segment-Pfad – kann relativ oder absolut sein
+                    if os.path.isabs(line):
+                        seg_path = line
+                    else:
+                        seg_path = os.path.join(playlist_dir, line)
+                    segments.append((current_duration, seg_path))
+    except Exception as e:
+        logger.error(f"Fehler beim Parsen von {playlist_path}: {e}")
+        return []
     return segments
 
-def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
+def ffmpeg_cut_clip(input_video, typ, start, duration, out_path, clip_dir=None):
+    """
+    Schneidet den Clip mit ffmpeg.
+    Bei HLS wird eine Concat-Datei verwendet.
+    Gibt True zurück bei Erfolg, wirft Exception bei Fehler.
+    """
     start = float(start)
     duration = float(duration)
 
+    # Stelle sicher, dass das Ausgabeverzeichnis existiert
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
     if typ == 'hls':
+        # Für HLS: Playlist parsen und Segmente konkatenieren
         segments = parse_m3u8(input_video)
         if not segments:
             raise Exception("Keine Segmente in Playlist gefunden")
@@ -93,15 +144,22 @@ def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
                 break
 
         needed = segments[start_idx:end_idx + 1]
+        logger.info(f"Benötigte Segmente: {len(needed)} von Index {start_idx} bis {end_idx}")
 
-        concat_file = os.path.join(os.path.dirname(out_path), 'concat.txt')
+        if clip_dir:
+            concat_file = os.path.join(clip_dir, 'concat.txt')
+        else:
+            concat_file = os.path.join(os.path.dirname(out_path), 'concat.txt')
+
         try:
             with open(concat_file, 'w') as f:
                 for seg_dur, seg_path in needed:
-                    f.write(f"file '{seg_path}'\n")
+                    if not os.path.exists(seg_path):
+                        logger.warning(f"Segment existiert nicht: {seg_path}")
+                    f.write(f"file '{os.path.abspath(seg_path)}'\n")
 
             cmd = [
-                'ffmpeg', '-y',
+                FFMPEG_PATH, '-y',
                 '-f', 'concat',
                 '-safe', '0',
                 '-i', concat_file,
@@ -116,28 +174,22 @@ def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
                 '-movflags', '+faststart',
                 out_path
             ]
-
+            logger.info(f"FFmpeg Befehl: {' '.join(cmd)}")
             result = subprocess.run(cmd, capture_output=True, text=True)
-            
-            if result.returncode == 0 and os.path.exists(out_path):
-                thumb_path = os.path.splitext(out_path)[0] + '.jpg'
-                subprocess.run([
-                    'ffmpeg', '-y', 
-                    '-ss', '1', 
-                    '-i', out_path, 
-                    '-vframes', '1', 
-                    '-q:v', '2', 
-                    thumb_path
-                ], capture_output=True)
-                
+
             if result.returncode != 0:
-                raise subprocess.CalledProcessError(result.returncode, cmd)
+                logger.error(f"FFmpeg HLS-Fehler: {result.stderr}")
+                raise subprocess.CalledProcessError(result.returncode, cmd, output=result.stdout, stderr=result.stderr)
+            else:
+                logger.info(f"Clip erfolgreich erstellt: {out_path}")
+
         finally:
             if os.path.exists(concat_file):
                 os.remove(concat_file)
-    else:
+
+    else:  # MP4
         cmd = [
-            'ffmpeg', '-y',
+            FFMPEG_PATH, '-y',
             '-ss', str(start),
             '-i', input_video,
             '-t', str(duration),
@@ -150,18 +202,14 @@ def ffmpeg_cut_clip(input_video, typ, start, duration, out_path):
             '-movflags', '+faststart',
             out_path
         ]
+        logger.info(f"FFmpeg Befehl: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.returncode == 0 and os.path.exists(out_path):
-            thumb_path = os.path.splitext(out_path)[0] + '.jpg'
-            subprocess.run([
-                'ffmpeg', '-y', 
-                '-ss', '1', 
-                '-i', out_path, 
-                '-vframes', '1', 
-                '-q:v', '2', 
-                thumb_path
-            ], capture_output=True)
+
+        if result.returncode != 0:
+            logger.error(f"FFmpeg MP4-Fehler: {result.stderr}")
+            raise subprocess.CalledProcessError(result.returncode, cmd, output=result.stdout, stderr=result.stderr)
+        else:
+            logger.info(f"Clip erfolgreich erstellt: {out_path}")
 
 def get_real_hls_duration(stream_id):
     index_path = os.path.join(VOD_FOLDER, stream_id, 'video', 'index.m3u8')
@@ -173,33 +221,71 @@ def get_real_hls_duration(stream_id):
             for line in f:
                 if line.startswith('#EXTINF:'):
                     duration += float(line.split(':')[1].split(',')[0])
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"Fehler beim Ermitteln der HLS-Dauer: {e}")
     return int(duration)
 
 def render_clip_background(clip_dir, start, duration, stream_dir):
+    """Rendert den Clip im Hintergrund und erstellt ein Thumbnail."""
+    logger.info(f"Thread gestartet für Clip {clip_dir} (start={start}, duration={duration})")
     out_path = os.path.join(clip_dir, 'clip.mp4')
     thumb_path = os.path.join(clip_dir, 'thumbnail.png')
 
+    # Prüfe, ob die Quelle existiert
     input_video, typ = get_input_video(stream_dir)
     if not input_video:
+        logger.error(f"Keine Videoquelle gefunden für {stream_dir}")
+        # Optional: Fehlerdatei anlegen
+        with open(os.path.join(clip_dir, 'error.txt'), 'w') as f:
+            f.write("Keine Videoquelle gefunden")
         return
 
     try:
-        ffmpeg_cut_clip(input_video, typ, start, duration, out_path)
+        # Clip erstellen
+        ffmpeg_cut_clip(input_video, typ, start, duration, out_path, clip_dir)
 
+        # Prüfen, ob der Clip erfolgreich erstellt wurde
         if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+            logger.info(f"Clip vorhanden, Größe: {os.path.getsize(out_path)}")
+            # Thumbnail erstellen
+            # Falls Clip kürzer als 1 Sekunde, verwende -ss 0
+            ss = '0.5' if duration >= 1.0 else '0'
             cmd_thumb = [
-                'ffmpeg', '-y',
+                FFMPEG_PATH, '-y',
                 '-i', out_path,
-                '-ss', '0.5',
+                '-ss', ss,
                 '-vframes', '1',
                 '-q:v', '2',
                 thumb_path
             ]
-            subprocess.run(cmd_thumb, check=True, capture_output=True, text=True)
+            thumb_result = subprocess.run(cmd_thumb, capture_output=True, text=True)
+            if thumb_result.returncode != 0:
+                logger.error(f"Thumbnail-Erstellung fehlgeschlagen: {thumb_result.stderr}")
+                # Versuche es mit einem anderen Keyframe
+                cmd_thumb2 = [
+                    FFMPEG_PATH, '-y',
+                    '-i', out_path,
+                    '-vf', 'thumbnail',
+                    '-frames:v', '1',
+                    thumb_path
+                ]
+                thumb_result2 = subprocess.run(cmd_thumb2, capture_output=True, text=True)
+                if thumb_result2.returncode == 0:
+                    logger.info("Thumbnail mit thumbnail-Filter erstellt")
+                else:
+                    logger.error(f"Thumbnail auch mit Filter fehlgeschlagen: {thumb_result2.stderr}")
+            else:
+                logger.info(f"Thumbnail gespeichert: {thumb_path}")
+        else:
+            logger.error(f"Clip wurde nicht erstellt oder ist leer: {out_path}")
+            with open(os.path.join(clip_dir, 'error.txt'), 'w') as f:
+                f.write("Clip wurde nicht erstellt oder ist leer")
     except Exception as e:
-        print(f"[CLIP] Error: {e}")
+        logger.exception(f"Fehler beim Rendern des Clips: {e}")
+        with open(os.path.join(clip_dir, 'error.txt'), 'w') as f:
+            f.write(f"Fehler: {str(e)}")
+
+# ========== Routes ==========
 
 @vod_bp.route('/stream/info')
 @login_required
@@ -269,7 +355,8 @@ def list_vods():
                 'duration': duration,
                 'thumbnail': thumbnail if os.path.exists(thumb_disk) else '/static/img/vod-placeholder.jpg'
             })
-        except Exception:
+        except Exception as e:
+            logger.error(f"Fehler beim Laden von VOD {stream_id}: {e}")
             continue
     return jsonify({'vods': sessions})
 
@@ -330,6 +417,13 @@ def create_clip():
     if not stream_id or start is None or end is None or not name:
         return jsonify({'error': 'Missing fields'}), 400
 
+    # Prüfe, ob die Quelle existiert, bevor wir den Clip anlegen
+    stream_dir = os.path.join(VOD_FOLDER, stream_id)
+    input_video, typ = get_input_video(stream_dir)
+    if not input_video:
+        logger.error(f"Clip-Erstellung abgebrochen: Quelle nicht gefunden für {stream_id}")
+        return jsonify({'error': 'Quellvideo nicht gefunden'}), 404
+
     hash_val = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
     clip_dir = os.path.join(VOD_FOLDER, 'clips', hash_val)
     os.makedirs(clip_dir, exist_ok=True)
@@ -351,14 +445,12 @@ def create_clip():
     with open(os.path.join(clip_dir, 'meta.json'), 'w', encoding='utf-8') as f:
         json.dump(clip_data, f, indent=2)
 
-    stream_dir = os.path.join(VOD_FOLDER, stream_id)
-    input_video, typ = get_input_video(stream_dir)
-
-    if input_video:
-        duration = float(end) - float(start)
-        thread = threading.Thread(target=render_clip_background, args=(clip_dir, start, duration, stream_dir))
-        thread.daemon = True
-        thread.start()
+    # Starte den Hintergrund-Thread
+    duration = float(end) - float(start)
+    thread = threading.Thread(target=render_clip_background, args=(clip_dir, start, duration, stream_dir))
+    thread.daemon = True
+    thread.start()
+    logger.info(f"Clip-Thread gestartet für {hash_val}")
 
     return jsonify({'hash': hash_val})
 
@@ -410,7 +502,11 @@ def clip_info(clip_id):
 def clip_status(clip_id):
     clip_dir = os.path.join(VOD_FOLDER, 'clips', clip_id)
     mp4_path = os.path.join(clip_dir, 'clip.mp4')
-    return jsonify({'ready': os.path.exists(mp4_path)})
+    thumb_path = os.path.join(clip_dir, 'thumbnail.png')
+    return jsonify({
+        'ready': os.path.exists(mp4_path),
+        'thumbnail_ready': os.path.exists(thumb_path)
+    })
 
 @vod_bp.route('/clip/<clip_id>/download')
 def download_clip(clip_id):
@@ -432,6 +528,7 @@ def download_clip(clip_id):
         if os.path.exists(out_path):
             return send_file(out_path, as_attachment=True, download_name=filename)
 
+        # Falls Clip noch nicht fertig, erstelle ihn synchron
         stream_id = clip_data.get('stream_id')
         start = float(clip_data.get('start', 0))
         duration = float(clip_data.get('end', 0)) - start
@@ -442,9 +539,10 @@ def download_clip(clip_id):
         if not input_video:
             return jsonify({'error': 'Source video not found'}), 404
 
-        ffmpeg_cut_clip(input_video, typ, start, duration, out_path)
+        ffmpeg_cut_clip(input_video, typ, start, duration, out_path, clip_dir)
         return send_file(out_path, as_attachment=True, download_name=filename)
     except Exception as e:
+        logger.exception(f"Download-Fehler für Clip {clip_id}: {e}")
         return jsonify({'error': str(e)}), 500
 
 @vod_bp.route('/download/session__settings')

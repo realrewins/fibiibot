@@ -358,24 +358,6 @@ function setupPlayerControls() {
     }
   });
 
-  // Tastatur-Steuerung: Space = Pause/Play, Pfeiltasten = 5s vor/zurück
-  document.addEventListener('keydown', (e) => {
-    if (!video || !currentVideoId) return;
-    // Nicht auslösen wenn man in einem Input-Feld tippt
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-    if (e.code === 'Space') {
-      e.preventDefault();
-      togglePlay();
-    } else if (e.code === 'ArrowRight') {
-      e.preventDefault();
-      video.currentTime = Math.min(video.currentTime + 5, currentVideoDuration);
-    } else if (e.code === 'ArrowLeft') {
-      e.preventDefault();
-      video.currentTime = Math.max(video.currentTime - 5, 0);
-    }
-  });
-
   video.addEventListener('dblclick', () => {
     if (!document.fullscreenElement) {
       videoContainer.requestFullscreen().catch(() => { });
@@ -384,7 +366,9 @@ function setupPlayerControls() {
     }
   });
 
-  let isSpaceDown = false;
+  // ==== Verbesserte Tastatursteuerung ====
+  let spacePressed = false;
+  let spaceTimer = null;
 
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -393,15 +377,14 @@ function setupPlayerControls() {
       case 'Space':
         e.preventDefault();
         e.stopPropagation();
-        if (!isSpaceDown) {
-          isSpaceDown = true;
-          video.playbackRate = 2.0;
+        if (!spacePressed) {
+          spacePressed = true;
+          spaceTimer = setTimeout(() => {
+            if (spacePressed) {
+              video.playbackRate = 2.0;
+            }
+          }, 200);
         }
-        break;
-      case 'Space':
-        e.preventDefault();
-        e.stopPropagation();
-        togglePlay();
         break;
       case 'KeyM':
         e.preventDefault();
@@ -458,8 +441,16 @@ function setupPlayerControls() {
     if (e.code === 'Space') {
       e.preventDefault();
       e.stopPropagation();
-      isSpaceDown = false;
-      video.playbackRate = 1.0;
+      if (spacePressed) {
+        clearTimeout(spaceTimer);
+        // Wenn die Geschwindigkeit noch nicht auf 2.0 gesetzt wurde (also kurzer Druck)
+        if (video.playbackRate !== 2.0) {
+          togglePlay();
+        }
+        // Geschwindigkeit zurücksetzen
+        video.playbackRate = 1.0;
+        spacePressed = false;
+      }
     }
   }, true);
 }

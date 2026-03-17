@@ -613,28 +613,25 @@ function renderOutageDrawer(outages) {
 }
 
 function renderTimelineMarkers(chapters) {
-    const container = document.getElementById('progressContainer');
-    if (!container) return;
+  const container = document.getElementById('progressContainer');
+  if (!container) return;
+  
+  container.querySelectorAll('.timeline-marker').forEach(m => m.remove());
 
-    container.style.background = 'transparent';
-    const bg = container.querySelector('.progress-bar-bg');
-    if (bg) bg.style.display = 'none';
+  if (!currentVideoDuration || currentVideoDuration === 0) return;
 
-    container.querySelectorAll('.timeline-marker').forEach(m => m.remove());
-    
-    if (!currentVideoDuration || currentVideoDuration === 0) return;
-
-    if (chapters) {
-        chapters.forEach(ch => {
-            if (ch.stream_sec <= 0) return;
-            const marker = document.createElement('div');
-            marker.className = 'timeline-marker';
-            const percent = (ch.stream_sec / currentVideoDuration) * 100;
-            marker.style.left = `${Math.min(100, percent)}%`;
-            container.appendChild(marker);
-        });
-    }
+  if (chapters) {
+    chapters.forEach(ch => {
+      if (ch.stream_sec <= 0) return;
+      const marker = document.createElement('div');
+      marker.className = 'timeline-marker';
+      const percent = (ch.stream_sec / currentVideoDuration) * 100;
+      marker.style.left = `${Math.min(100, percent)}%`;
+      container.appendChild(marker);
+    });
+  }
 }
+
 function handleOutagePlayback() {
     video.addEventListener('timeupdate', () => {
         if (!currentOutages) return;

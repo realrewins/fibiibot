@@ -75,6 +75,11 @@ def view_clip(clip_id):
     except Exception:
         return "Template vodclip.html nicht gefunden.", 500
 
+@main_bp.route('/403')
+@login_required
+def 403_page():
+    return render_template('403.html', csrf_token=generate_csrf_token(), user=session['user'], current_page='403')
+
 @main_bp.route('/download/<filename>')
 @login_required
 def download_file(filename):

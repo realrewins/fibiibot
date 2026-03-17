@@ -1,26 +1,6 @@
 {
   "documents": [
     {
-      "id": "realrewins",
-      "fields": {
-        "username": {
-          "stringValue": "realrewins"
-        },
-        "roles": {
-          "arrayValue": {
-            "values": [
-              {
-                "stringValue": "dev"
-              }
-            ]
-          }
-        },
-        "display_name": {
-          "stringValue": "realRewins"
-        }
-      }
-    },
-    {
       "id": "xqirby",
       "fields": {
         "username": {
@@ -37,6 +17,46 @@
         },
         "display_name": {
           "stringValue": "xQirby"
+        }
+      }
+    },
+    {
+      "id": "realrewins",
+      "fields": {
+        "username": {
+          "stringValue": "realrewins"
+        },
+        "display_name": {
+          "stringValue": "realRewins"
+        },
+        "roles": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "viewer"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "xfibiiwife",
+      "fields": {
+        "username": {
+          "stringValue": "xfibiiwife"
+        },
+        "display_name": {
+          "stringValue": "xfibiiWife"
+        },
+        "roles": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "viewer"
+              }
+            ]
+          }
         }
       }
     }

@@ -1,0 +1,28 @@
+.welcome-header {
+    margin-top: 4rem;
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.welcome-header h1 {
+    font-family: 'ABeeZee', sans-serif;
+    font-weight: 400;
+    font-size: 2.6rem;
+    margin: 0 0 0.35rem 0;
+    color: var(--text-primary);
+}
+
+.welcome-header h1 span {
+    color: #ffb27a;
+}
+
+.welcome-header p {
+    font-family: 'ABeeZee', sans-serif;
+    font-weight: 400;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+#display_namePlaceholder {
+    color: #ffb27a;
+}

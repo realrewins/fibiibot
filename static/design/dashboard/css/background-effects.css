@@ -1,0 +1,123 @@
+.vira-bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-color: #000000;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.vira-video-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vira-mask-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    mix-blend-mode: multiply;
+}
+
+.vira-color-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: screen;
+}
+
+.vira-lights-wrapper {
+    position: absolute;
+    top: -15vh;
+    right: 22vw;
+    width: 0;
+    height: 0;
+    filter: blur(10px);
+}
+
+.vira-light {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 50% 0;
+}
+
+.vira-light-1 {
+    width: 120px;
+    height: 95vh;
+    transform: translate(-50%, 0) rotate(35deg);
+    animation: rayPulse 10s infinite ease-in-out 0s;
+}
+
+.vira-light-2 {
+    width: 50px;
+    height: 105vh;
+    transform: translate(-50%, 0) rotate(48deg);
+    animation: rayPulse 10s infinite ease-in-out 1.2s;
+}
+
+.vira-light-3 {
+    width: 90px;
+    height: 85vh;
+    transform: translate(-50%, 0) rotate(42deg);
+    animation: rayPulse 10s infinite ease-in-out 2.4s;
+}
+
+.vira-light-4 {
+    width: 100px;
+    height: 110vh;
+    transform: translate(-50%, 0) rotate(28deg);
+    animation: rayPulse 10s infinite ease-in-out 3.6s;
+}
+
+.vira-light-5 {
+    width: 150px;
+    height: 90vh;
+    transform: translate(-50%, 0) rotate(55deg);
+    animation: rayPulse 10s infinite ease-in-out 4.8s;
+}
+
+.vira-light-6 {
+    width: 140px;
+    height: 100vh;
+    transform: translate(-50%, 0) rotate(62deg);
+    animation: rayPulse 10s infinite ease-in-out 6.0s;
+}
+
+.vira-light-7 {
+    width: 80px;
+    height: 90vh;
+    transform: translate(-50%, 0) rotate(22deg);
+    animation: rayPulse 10s infinite ease-in-out 7.2s;
+}
+
+.vira-light-8 {
+    width: 70px;
+    height: 95vh;
+    transform: translate(-50%, 0) rotate(38deg);
+    animation: rayPulse 10s infinite ease-in-out 8.4s;
+}
+
+.mask-white {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0) 80%);
+}
+
+.color-orange {
+    background: linear-gradient(180deg, rgba(255, 178, 122, 0.2) 0%, rgba(255, 178, 122, 0.05) 40%, rgba(255, 178, 122, 0) 80%);
+}
+
+.color-orange-glow {
+    background: radial-gradient(circle at center, rgba(255, 178, 122, 0.12) 0%, rgba(255, 178, 122, 0) 60%);
+}

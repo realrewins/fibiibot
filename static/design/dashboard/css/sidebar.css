@@ -1,0 +1,127 @@
+.sidebar {
+    width: 280px;
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border-accent);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.sidebar-logo {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: baseline;
+}
+
+.logo-fibii {
+    background: linear-gradient(135deg, #fff, #c5c5e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logo-bot {
+    background: linear-gradient(135deg, var(--accent), #b48aff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-left: 0.15rem;
+}
+
+.sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.2rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    text-align: left;
+}
+
+.nav-item i {
+    width: 1.8rem;
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    transition: var(--transition);
+    text-align: center;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: white;
+}
+
+.nav-item:hover i {
+    color: var(--accent);
+}
+
+.nav-item.active {
+    background: rgba(138, 79, 255, 0.15);
+    color: white;
+}
+
+.nav-item.active i {
+    color: var(--accent);
+}
+
+.nav-item.logout {
+    color: var(--red);
+}
+
+.nav-item.logout i {
+    color: var(--red);
+}
+
+.nav-divider {
+    height: 1px;
+    background: var(--border-light);
+    margin: 0.5rem 0;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.sidebar-bug-badge {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #ff4a4a;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff4a4a;
+    animation: pulse 1.5s infinite;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-bug-badge.show {
+    opacity: 1;
+    visibility: visible;
+}

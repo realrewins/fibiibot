@@ -1,0 +1,55 @@
+.improvement-section {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.improvement-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    backdrop-filter: blur(8px);
+}
+
+.improvement-box p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.improvement-box p i {
+    color: var(--gold);
+    font-size: 1.1rem;
+}
+
+.improvement-box p strong {
+    color: var(--text-primary);
+}
+
+.improvement-box p em {
+    color: var(--accent);
+    font-style: italic;
+}
+
+.improvement-box .btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.4rem 1.2rem;
+    font-size: 0.8rem;
+}
+
+.improvement-box .btn:hover {
+    background: var(--accent);
+    color: white;
+}

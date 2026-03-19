@@ -1,0 +1,193 @@
+.dynamic-header {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3000;
+    width: calc(100% - 8rem);
+    max-width: 1200px;
+    box-sizing: border-box;
+    padding: 8px 20px;
+    margin-bottom: 2rem;
+    border-radius: 100px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    isolation: isolate;
+    overflow: visible;
+}
+
+.dynamic-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: rgba(18, 18, 18, 0.20);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    filter: url(#glass-distortion);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    background-clip: padding-box;
+    z-index: -1;
+}
+
+.dynamic-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.03), inset -1px -1px 8px rgba(255, 255, 255, 0.02);
+    z-index: -1;
+}
+
+.dynamic-header .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-brand-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.header-brand-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.icon-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.icon-button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.profile-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    border-radius: 40px;
+    transition: var(--transition);
+    height: 40px;
+}
+
+.profile-button::before {
+    content: '';
+    position: absolute;
+    left: 0.3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.profile-button:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-avatar {
+    position: relative;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: none;
+}
+
+.profile-button i,
+.profile-button svg {
+    color: white;
+    font-size: 0.8rem;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+    transform: perspective(400px) rotateX(0deg);
+    display: inline-block;
+    transform-origin: center;
+    backface-visibility: visible;
+}
+
+.profile-button.active i,
+.profile-button.active svg {
+    transform: perspective(400px) rotateX(-180deg);
+}
+
+.menu-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    margin-right: 0.5rem;
+}
+
+.menu-button:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.menu-button lottie-player {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+}
+
+#notificationBtn i {
+    color: #fff;
+}

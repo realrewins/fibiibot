@@ -1,0 +1,42 @@
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    border-radius: 40px;
+    background: #1a1a24;
+    border: 1px solid var(--border-light);
+    color: white;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.form-group textarea {
+    border-radius: 1rem;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(138, 79, 255, 0.15);
+}
+
+.input-error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 3px rgba(255, 95, 95, 0.2) !important;
+    animation: shake 0.3s ease-in-out;
+}

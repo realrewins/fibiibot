@@ -1,0 +1,20 @@
+:root {
+    --bg-app: transparent;
+    --sidebar-bg: #12121a;
+    --main-bg: transparent;
+    --card-bg: rgba(25, 25, 35, 0.6);
+    --border-light: rgba(255, 255, 255, 0.05);
+    --border-accent: rgba(138, 79, 255, 0.3);
+    --text-primary: #f0f0f0;
+    --text-secondary: #a8a8c0;
+    --text-muted: #707088;
+    --accent: #8a4fff;
+    --accent-glow: rgba(138, 79, 255, 0.4);
+    --red: #ff5f5f;
+    --green: #3acf6b;
+    --gold: #ffd966;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+    --transition: 0.2s ease;
+}

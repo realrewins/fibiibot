@@ -1,0 +1,16 @@
+.app-layout {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem 4rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--main-bg);
+    overflow-y: auto;
+}

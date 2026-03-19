@@ -1,0 +1,58 @@
+.role-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 40px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.role-tag.role-admin {
+    background: rgba(255, 95, 95, 0.15);
+    color: #ff8a8a;
+    border-color: rgba(255, 95, 95, 0.3);
+    box-shadow: 0 0 10px rgba(255, 95, 95, 0.3);
+}
+
+.role-tag.role-dev {
+    background: rgba(88, 166, 255, 0.15);
+    color: #79c0ff;
+    border-color: rgba(88, 166, 255, 0.3);
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+}
+
+.role-tag.role-broadcaster {
+    background: rgba(138, 79, 255, 0.15);
+    color: #b48aff;
+    border-color: rgba(138, 79, 255, 0.3);
+    box-shadow: 0 0 10px rgba(138, 79, 255, 0.3);
+}
+
+.role-tag.role-editor {
+    background: rgba(58, 207, 107, 0.1);
+    color: #8bff8b;
+    border-color: rgba(58, 207, 107, 0.2);
+    box-shadow: 0 0 10px rgba(58, 207, 107, 0.2);
+}
+
+.role-tag.role-master {
+    background: rgba(255, 217, 102, 0.15);
+    color: #ffd966;
+    border-color: rgba(255, 217, 102, 0.3);
+    box-shadow: 0 0 10px rgba(255, 217, 102, 0.3);
+}
+
+.role-tag.role-viewer {
+    background: rgba(128, 128, 128, 0.15);
+    color: #b0b0b0;
+    border-color: rgba(128, 128, 128, 0.3);
+    box-shadow: 0 0 10px rgba(128, 128, 128, 0.3);
+}

@@ -1,89 +1,111 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Fibii Bot · Dashboard</title>
-    <link rel="stylesheet" href="/static/design/dashboard/css/dashboard.css">
+    <link rel="icon" href="/static/icons/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/design/dashboard/css/variables.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/reset.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/layout.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/header.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/dropdowns.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/notifications.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/sidebar.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/stats.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/mod-section.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/forms.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/buttons.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/modals.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/toasts.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/role-tags.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/animations.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/utilities.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/background-effects.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/responsive.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/welcome-header.css">
+    <link rel="stylesheet" href="/static/design/dashboard/css/scrollbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
 </head>
+
 <body>
+    <div class="vira-bg-container">
+        <video class="vira-video-layer" src="https://videos.pexels.com/video-files/9665235/9665235-sd_960_540_25fps.mp4"
+            loop autoplay muted playsinline></video>
+        <div class="vira-mask-layer">
+            <div class="vira-lights-wrapper">
+                <div class="vira-light vira-light-1 mask-white"></div>
+                <div class="vira-light vira-light-2 mask-white"></div>
+                <div class="vira-light vira-light-3 mask-white"></div>
+                <div class="vira-light vira-light-4 mask-white"></div>
+                <div class="vira-light vira-light-5 mask-white"></div>
+                <div class="vira-light vira-light-6 mask-white"></div>
+                <div class="vira-light vira-light-7 mask-white"></div>
+                <div class="vira-light vira-light-8 mask-white"></div>
+            </div>
+        </div>
+        <div class="vira-color-layer">
+            <div class="vira-lights-wrapper">
+                <div class="vira-light vira-light-1 color-orange"></div>
+                <div class="vira-light vira-light-2 color-orange"></div>
+                <div class="vira-light vira-light-3 color-orange"></div>
+                <div class="vira-light vira-light-4 color-orange"></div>
+                <div class="vira-light vira-light-5 color-orange"></div>
+                <div class="vira-light vira-light-6 color-orange"></div>
+                <div class="vira-light vira-light-7 color-orange"></div>
+                <div class="vira-light vira-light-8 color-orange"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="app-layout">
-        <aside class="sidebar">
-            <div class="sidebar-logo" onclick="window.location.href='/'">
-                <span class="logo-fibii">fibii</span><span class="logo-bot">BOT</span>
-            </div>
-            <nav class="sidebar-nav">
-                <button onclick="window.location.href='/'" class="nav-item {% if current_page == 'dashboard' %}active{% endif %}">
-                    <i class="fa-solid fa-house"></i>
-                    <span>Dashboard</span>
-                </button>
-                <div class="nav-divider"></div>
-                {% if user.role in ['admin','dev','broadcaster','editor'] %}
-                <button onclick="window.location.href='/guide'" class="nav-item {% if current_page == 'guide' %}active{% endif %}">
-                    <i class="fas fa-book-open"></i>
-                    <span>Modguide</span>
-                </button>
-                {% endif %}
-                {% if user.role in ['admin','dev','broadcaster','editor'] %}
-                <button onclick="window.location.href='/clips'" class="nav-item {% if current_page == 'clips' %}active{% endif %}">
-                    <i class="fas fa-clipboard"></i>
-                    <span>Clips</span>
-                </button>
-                {% endif %}
-                {% if user.role in ['admin','dev','broadcaster','editor'] %}
-                <button onclick="window.location.href='/suggestions'" class="nav-item {% if current_page == 'suggestions' %}active{% endif %}">
-                    <i class="fas fa-user-slash"></i>
-                    <span>Blacklist</span>
-                </button>
-                {% endif %}
-                {% if user.role in ['admin','dev','broadcaster','editor'] %}
-                <button onclick="window.location.href='/giveaway'" class="nav-item {% if current_page == 'giveaway' %}active{% endif %}">
-                    <i class="fa-solid fa-gift"></i>
-                    <span>Giveaway</span>
-                </button>
-                {% endif %}
-                {% if user.role in ['admin','dev','broadcaster'] %}
-                <button onclick="window.location.href='/bugs'" class="nav-item {% if current_page == 'bugs' %}active{% endif %}" id="navBugReports">
-                    <i class="fas fa-bug"></i>
-                    <span>Bug Reports</span>
-                    <span class="sidebar-bug-badge" id="sidebarBugBadge"></span>
-                </button>
-                {% else %}
-                <div style="display: none;" id="navBugReports"></div>
-                <div style="display: none;" id="sidebarBugBadge"></div>
-                {% endif %}
-                {% if user.role in ['admin','dev','broadcaster','editor'] %}
-                <button onclick="window.location.href='/bot'" class="nav-item {% if current_page == 'bot' %}active{% endif %}">
-                    <i class="fa-solid fa-robot"></i>
-                    <span>Bot</span>
-                </button>
-                {% endif %}
-                <button onclick="window.location.href='/vod'" class="nav-item {% if current_page == 'vod' %}active{% endif %}">
-                    <i class="fa-solid fa-video"></i>
-                    <span>VOD</span>
-                </button>
-            </nav>
-            <div class="sidebar-footer">
-                <button onclick="window.location.href='/settings'" class="nav-item {% if current_page == 'settings' %}active{% endif %}">
-                    <i class="fas fa-cog"></i>
-                    <span>Einstellungen</span>
-                </button>
-                <button onclick="logout()" class="nav-item logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
-        </aside>
         <main class="main-content">
-            <div class="top-bar">
-                <div class="top-bar-left"></div>
-                <div class="top-bar-right">
-                    <div class="dev-notice"><i class="fa-solid fa-code"></i> Page in der Entwicklung</div>
-                    <button class="report-btn" id="bugReportBtn">
-                        <i class="fas fa-bug"></i>
-                        <span>Report Bug</span>
+            <header class="dynamic-header">
+                <div class="header-left">
+                    <button class="menu-button" id="menuToggle">
+                        <lottie-player id="menuLottie" src="/static/icons/icons8-menu.json" background="transparent"
+                            speed="1.5" mode="normal"></lottie-player>
                     </button>
+                    <div class="header-brand">
+                        <img src="/static/icons/fibiibot512.png" alt="FibiiBot Logo" class="header-brand-logo">
+                        <h1 class="header-brand-text">FIBIIBOT</h1>
+                    </div>
+
+                    <div class="glass-dropdown" id="navDropdown">
+                        <button class="dropdown-item" onclick="window.location.href='/'"><i
+                                class="fa-solid fa-house"></i> Dashboard</button>
+                        <div class="divider"></div>
+                        <button class="dropdown-item" onclick="window.location.href='/guide'"><i
+                                class="fas fa-book-open"></i> Modguide</button>
+                        <button class="dropdown-item" onclick="window.location.href='/clips'"><i
+                                class="fas fa-clipboard"></i> Clips</button>
+                        <button class="dropdown-item" onclick="window.location.href='/suggestions'"><i
+                                class="fas fa-user-slash"></i> Blacklist</button>
+                        <button class="dropdown-item" onclick="window.location.href='/giveaway'"><i
+                                class="fa-solid fa-gift"></i> Giveaway</button>
+                        <button class="dropdown-item" id="navBugReports" onclick="window.location.href='/bugs'"><i
+                                class="fas fa-bug"></i> Bug Reports</button>
+                        <button class="dropdown-item" onclick="window.location.href='/bot'"><i
+                                class="fa-solid fa-robot"></i> Bot</button>
+                        <button class="dropdown-item" onclick="window.location.href='/vod'"><i
+                                class="fa-solid fa-video"></i> VOD</button>
+                        <div class="divider"></div>
+                        <button class="dropdown-item" onclick="window.location.href='/settings'"><i
+                                class="fas fa-cog"></i> Einstellungen</button>
+                        <button class="dropdown-item logout" onclick="logout()" style="color: #ff6b6b;"><i
+                                class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                </div>
+
+                <div class="header-right">
                     <div class="notification-dropdown-container">
                         <button class="icon-button" id="notificationBtn">
                             <i class="fas fa-bell"></i>
@@ -91,68 +113,49 @@
                         </button>
                         <div class="notification-dropdown" id="notificationDropdown">
                             <div class="dropdown-header">
-                                <i class="fas fa-bell"></i>
-                                <span>Benachrichtigungen</span>
+                                <i class="fas fa-bell" style="color: #ffb27a;"></i>
+                                <span style="font-weight:600; color:white; margin-left:10px;">Benachrichtigungen</span>
                             </div>
+                            <div id="notificationList"></div>
                         </div>
                     </div>
+
                     <div class="profile-dropdown-container">
                         <button class="profile-button" id="profileBtn">
-                            <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                            <img id="profileAvatar" src="" alt="" class="profile-avatar">
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         <div class="profile-dropdown" id="profileDropdown">
                             <div class="dropdown-header">
-                                <img id="dropdownAvatar" src="" alt="">
-                                <div>
-                                    <div id="dropdownName"></div>
+                                <img id="dropdownAvatar" class="dropdown-avatar" src="" alt="">
+                                <div class="dropdown-user-info">
+                                    <div id="dropdownName" class="dropdown-name"></div>
                                     <div id="dropdownRole" class="role-tag"></div>
                                 </div>
                             </div>
-                            <a href="#" onclick="window.location.href='/settings'; return false;"><i class="fas fa-cog"></i> User-Settings</a>
-                            <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            <div class="divider"></div>
+                            <a href="#" onclick="window.location.href='/settings'; return false;"><i
+                                    class="fas fa-cog"></i> Settings</a>
+                            <a href="#" onclick="window.location.href='/bugs'; return false;"><i
+                                    class="fas fa-flag"></i> Report</a>
+                            <div class="divider"></div>
+                            <a href="#" onclick="logout(); return false;" class="logout-link"><i
+                                    class="fas fa-sign-out-alt"></i> Logout</a>
                         </div>
                     </div>
                 </div>
+            </header>
+
+            <div class="welcome-header" aria-label="Willkommen">
+                <h1 style="font-size:2.6rem; margin:0 0 0.35rem 0;">Willkommen zurück, <span
+                        id="display_namePlaceholder" style="font-size:1.15em; font-weight:700;">realRewins</span></h1>
             </div>
-            <div class="welcome-header">
-                <h1>Willkommen zurück, <span id="display_namePlaceholder"></span></h1>
-                <p>Hoffentlich hast du einen wundervollen Tag!</p>
-            </div>
-            <section class="mod-section">
-                <h2>Mod-Kontakte</h2>
-                <p>Bei Fragen zu Moderation oder Chat-Clients wende dich an:</p>
-                <div class="mod-grid">
-                    <a href="https://twitch.tv/Fabi391" target="_blank" class="mod-card">
-                        <i class="fab fa-twitch"></i>
-                        <span>@Fabi391</span>
-                    </a>
-                    <a href="https://twitch.tv/thisisjonass" target="_blank" class="mod-card">
-                        <i class="fab fa-twitch"></i>
-                        <span>@thisisjonass</span>
-                    </a>
-                    <a href="https://twitch.tv/harass_" target="_blank" class="mod-card">
-                        <i class="fab fa-twitch"></i>
-                        <span>@Harass_</span>
-                    </a>
-                    <a href="https://twitch.tv/tida99" target="_blank" class="mod-card">
-                        <i class="fab fa-twitch"></i>
-                        <span>@Tida99</span>
-                    </a>
-                    <a href="https://twitch.tv/xQirby" target="_blank" class="mod-card">
-                        <i class="fab fa-twitch"></i>
-                        <span>@xQirby</span>
-                    </a>
-                </div>
-            </section>
+
             <section class="stats-section">
                 <div class="stats-grid">
                     <div class="stat-card stat-card-watched">
                         <div class="stat-header-row">
-                            <div class="stat-header">
-                                <i class="fa-solid fa-clock"></i>
-                                <span>Hours Watched</span>
-                            </div>
+                            <div class="stat-header"><i class="fa-solid fa-clock"></i><span>Hours Watched</span></div>
                             <div class="stream-date" id="stream-date-watched"></div>
                         </div>
                         <div class="stat-value-row">
@@ -163,10 +166,7 @@
                     </div>
                     <div class="stat-card stat-card-viewers">
                         <div class="stat-header-row">
-                            <div class="stat-header">
-                                <i class="fa-solid fa-eye"></i>
-                                <span>Avg. Viewers</span>
-                            </div>
+                            <div class="stat-header"><i class="fa-solid fa-eye"></i><span>Avg. Viewers</span></div>
                             <div class="stream-date" id="stream-date-viewers"></div>
                         </div>
                         <div class="stat-value-row">
@@ -177,9 +177,7 @@
                     </div>
                     <div class="stat-card stat-card-followers">
                         <div class="stat-header-row">
-                            <div class="stat-header">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <span>Followers Gained</span>
+                            <div class="stat-header"><i class="fa-solid fa-user-plus"></i><span>Followers Gained</span>
                             </div>
                             <div class="stream-date" id="stream-date-followers"></div>
                         </div>
@@ -191,10 +189,7 @@
                     </div>
                     <div class="stat-card stat-card-uptime">
                         <div class="stat-header-row">
-                            <div class="stat-header">
-                                <i class="fa-solid fa-signal"></i>
-                                <span>Airtime</span>
-                            </div>
+                            <div class="stat-header"><i class="fa-solid fa-signal"></i><span>Airtime</span></div>
                             <div class="stream-date" id="stream-date-uptime"></div>
                         </div>
                         <div class="stat-value-row">
@@ -205,58 +200,68 @@
                     </div>
                 </div>
             </section>
+
+            <section class="mod-section">
+                <div class="mod-grid-wrap">
+                    <h2 class="mod-title">MOD-Kontakte</h2>
+                    <div></div>
+                    <div class="dev-title">DEV‑Kontakt</div>
+
+                    <div class="mod-cards" aria-hidden="false">
+                        <a href="https://twitch.tv/Fabi391" target="_blank" class="mod-card"
+                            rel="noopener noreferrer"><i class="fab fa-twitch"
+                                aria-hidden="true"></i><span>Fabi391</span></a>
+                        <a href="https://twitch.tv/thisisjonass" target="_blank" class="mod-card"
+                            rel="noopener noreferrer"><i class="fab fa-twitch"
+                                aria-hidden="true"></i><span>thisisjonass</span></a>
+                        <a href="https://twitch.tv/harass_" target="_blank" class="mod-card"
+                            rel="noopener noreferrer"><i class="fab fa-twitch"
+                                aria-hidden="true"></i><span>Harass_</span></a>
+                        <a href="https://twitch.tv/tida99" target="_blank" class="mod-card" rel="noopener noreferrer"><i
+                                class="fab fa-twitch" aria-hidden="true"></i><span>Tida99</span></a>
+                        <a href="https://twitch.tv/xQirby" target="_blank" class="mod-card" rel="noopener noreferrer"><i
+                                class="fab fa-twitch" aria-hidden="true"></i><span>xQirby</span></a>
+                    </div>
+
+                    <div></div>
+
+                    <div class="dev-card-wrapper" aria-label="DEV Kontakt">
+                        <a href="https://discord.com/users/706423741856350299" target="_blank" class="mod-card"
+                            rel="noopener noreferrer">
+                            <i class="fa-brands fa-discord" aria-hidden="true"></i>
+                            <span>rewins</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             <section class="improvement-section">
                 <div class="improvement-box">
-                    <p><i class="fa-regular fa-lightbulb"></i> Bei Verbesserungsvorschlägen nutz gerne das <strong>Bug Report Tool</strong> oder schreib <strong>rewins_</strong> auf Discord. Schreib zur Besseren Filterbarkeit bitte in den Betreff: <em>Verbesserung: Dein Thema</em></p>
-                    <button class="btn" onclick="openBugReportWithSuggestion()"><i class="fa-solid fa-bug"></i> Zum Bug Report</button>
+
                 </div>
             </section>
         </main>
     </div>
 
-    <div id="bugReportModal" class="modal">
-        <div class="bug-modal-content" onclick="event.stopPropagation()">
-            <div class="bug-modal-header">
-                <h3><i class="fas fa-bug"></i> Bug melden</h3>
-                <button class="modal-close" onclick="closeModal('bugReportModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="bug-modal-body">
-                <p>Bug Reports werden an rewins weitergeleitet und zeitnah gefixed.</p>
-                <form id="bugReportForm">
-                    <div class="form-group">
-                        <label for="bugSubject">Betreff</label>
-                        <input type="text" id="bugSubject" placeholder="Kurze Zusammenfassung" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="bugDescription">Beschreibung</label>
-                        <textarea id="bugDescription" rows="5" placeholder="Was ist passiert? Wie können wir es fixen?" required></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="bug-modal-footer">
-                <button class="btn" onclick="submitBugReport()">Absenden</button>
-                <button class="btn" style="background: #2f2f38;" onclick="closeModal('bugReportModal')">Abbrechen</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast" class="toast">
-        <div class="toast-content">
-            <i class="fas fa-check-circle"></i>
-            <span id="toastMessage">Danke für deine Hilfe! Wir werden dir bald ein Update zum Bug geben.</span>
-        </div>
-    </div>
-
-    <script src="/static/design/dashboard/js/dashboard.js"></script>
-    <script>
-        function updateWelcomeName() {
-            if (window.currentUser && window.currentUser.display_name) {
-                document.getElementById('display_namePlaceholder').innerText = window.currentUser.display_name;
-            } else {
-                setTimeout(updateWelcomeName, 100);
-            }
-        }
-        window.addEventListener('load', updateWelcomeName);
-    </script>
+    <script src="/static/design/dashboard/js/constants.js" defer></script>
+    <script src="/static/design/dashboard/js/state.js" defer></script>
+    <script src="/static/design/dashboard/js/formatUtils.js" defer></script>
+    <script src="/static/design/dashboard/js/domUtils.js" defer></script>
+    <script src="/static/design/dashboard/js/lottie.js" defer></script>
+    <script src="/static/design/dashboard/js/modals.js" defer></script>
+    <script src="/static/design/dashboard/js/auth.js" defer></script>
+    <script src="/static/design/dashboard/js/bugReports.js" defer></script>
+    <script src="/static/design/dashboard/js/notifications.js" defer></script>
+    <script src="/static/design/dashboard/js/highlight.js" defer></script>
+    <script src="/static/design/dashboard/js/chartsRenderer.js" defer></script>
+    <script src="/static/design/dashboard/js/statsUpdater.js" defer></script>
+    <script src="/static/design/dashboard/js/statsLoader.js" defer></script>
+    <script src="/static/design/dashboard/js/dropdownCore.js" defer></script>
+    <script src="/static/design/dashboard/js/dropdownEvents.js" defer></script>
+    <script src="/static/design/dashboard/js/headerSticky.js" defer></script>
+    <script src="/static/design/dashboard/js/autoUpdate.js" defer></script>
+    <script src="/static/design/dashboard/js/init.js" defer></script>
+    <script src="/static/design/dashboard/js/main.js" defer></script>
 </body>
+
 </html>

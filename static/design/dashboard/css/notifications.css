@@ -1,0 +1,197 @@
+.notification-dropdown {
+    width: 380px !important;
+    min-width: 380px !important;
+    padding-bottom: 0 !important;
+    max-height: 480px !important;
+    overflow-y: auto !important;
+}
+
+.notification-dropdown .dropdown-header,
+.notification-dropdown h3,
+.notification-dropdown .header-title {
+    padding: 1.2rem 1.5rem 0.5rem 2.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+#notificationList {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    overflow: visible !important;
+    max-height: none !important;
+    border-bottom-left-radius: 1.5rem !important;
+    border-bottom-right-radius: 1.5rem !important;
+}
+
+.notification-dropdown .notification-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.8rem !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    border-radius: 0 !important;
+    padding: 0.9rem 1.5rem !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-family: inherit !important;
+    font-size: 0.9rem !important;
+    text-align: left !important;
+    word-break: break-word !important;
+    white-space: pre-wrap !important;
+    margin: 0 !important;
+    position: relative;
+    box-shadow: none !important;
+}
+
+.notification-dropdown .notification-item>* {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+}
+
+.notification-dropdown .notification-item:last-child {
+    border-bottom: none !important;
+}
+
+.notification-dropdown .notification-item:hover,
+.notification-dropdown .notification-item:focus,
+.notification-dropdown .notification-item:active {
+    background: transparent !important;
+    transform: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.notification-dropdown .notification-item::before,
+.notification-dropdown .notification-item::after {
+    display: none !important;
+}
+
+.notification-header {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0.8rem !important;
+}
+
+.notification-author {
+    font-weight: 600 !important;
+    color: var(--text-primary, #ffffff) !important;
+    font-size: 0.95rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.6rem !important;
+}
+
+.notification-time {
+    font-size: 0.8rem !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.notification-message {
+    line-height: 1.5 !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    margin: 0 !important;
+    white-space: pre-wrap !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background: #ff4a4a;
+    border-radius: 50%;
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+.notification-badge.show {
+    display: block;
+}
+
+.notification-badge.glow {
+    box-shadow: 0 0 10px #ff4a4a;
+    animation: pulse 1.5s infinite;
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--red, #ff5f5f);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(255, 95, 95, 0.6);
+    animation: pulse-dot 2s infinite ease-in-out;
+    flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+}
+
+.notification-dropdown::-webkit-scrollbar {
+    width: 14px !important;
+    background: transparent !important;
+}
+
+.notification-dropdown::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb {
+    background: #ffb27a !important;
+    border-radius: 10px !important;
+    border: 4px solid transparent !important;
+    background-clip: padding-box !important;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #e69c5c !important;
+    border: 4px solid transparent !important;
+    background-clip: padding-box !important;
+}
+
+.notification-dropdown::-webkit-scrollbar-button {
+    display: none !important;
+}
+
+.notification-dropdown {
+    scrollbar-width: thin !important;
+    scrollbar-color: #ffb27a transparent !important;
+}

@@ -28,13 +28,13 @@ async function checkForNewNotifications() {
 function renderNotifications(notifications) {
     const dropdown = document.getElementById('notificationDropdown');
     if (!dropdown) return;
-    
+
     while (dropdown.children.length > 1) dropdown.removeChild(dropdown.lastChild);
-    
+
     const list = document.createElement('div');
     list.id = 'notificationList';
     dropdown.appendChild(list);
-    
+
     if (notifications && notifications.length > 0) {
         notifications.forEach(notif => {
             const date = new Date(notif.timestamp);
@@ -43,22 +43,22 @@ function renderNotifications(notifications) {
             const hour = String(date.getHours()).padStart(2, '0');
             const minute = String(date.getMinutes()).padStart(2, '0');
             const formattedDate = `${day}.${month}, ${hour}:${minute}`;
-            
+
             const item = document.createElement('div');
             item.className = 'notification-item';
             if (!notif.read) item.classList.add('unread');
-            
+
             item.innerHTML = `
                 <div class="notification-header">
                     <span>${formattedDate} • ${notif.from_user}</span>
                 </div>
                 <div class="notification-message">${notif.message}</div>
             `;
-            
+
             if (notif.id) {
                 item.addEventListener('click', () => markAsRead(notif.id));
             }
-            
+
             list.appendChild(item);
         });
     } else {

@@ -29,22 +29,6 @@
     border-bottom-left-radius: 1.5rem !important;
     border-bottom-right-radius: 1.5rem !important;
     box-sizing: border-box !important;
-    background: transparent !important;
-}
-
-#notificationList > *,
-.notification-dropdown a,
-.notification-dropdown li,
-.notification-dropdown .dropdown-item,
-.notification-dropdown .notification-wrapper,
-.notification-dropdown .list-group-item {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    text-decoration: none !important;
 }
 
 .notification-dropdown .notification-item {
@@ -68,25 +52,6 @@
     box-shadow: none !important;
     box-sizing: border-box !important;
     cursor: pointer !important;
-}
-
-.notification-dropdown .notification-item > *,
-.notification-dropdown .notification-item div,
-.notification-dropdown .notification-item p,
-.notification-dropdown .notification-item span,
-.notification-dropdown .notification-item .card,
-.notification-dropdown .notification-item .inner {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-.notification-dropdown .notification-item::before,
-.notification-dropdown .notification-item::after {
-    display: none !important;
-    content: none !important;
 }
 
 .notification-dropdown .notification-item:last-child {
@@ -115,12 +80,6 @@
     border: none !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
     box-shadow: none !important;
-}
-
-.notification-dropdown .notification-item.unread::before,
-.notification-dropdown .notification-item.unread::after {
-    display: none !important;
-    content: none !important;
 }
 
 .notification-dropdown .notification-item.unread:last-child {
@@ -165,10 +124,12 @@
         opacity: 0.5;
         transform: scale(0.9);
     }
+
     50% {
         opacity: 1;
         transform: scale(1.1);
     }
+
     100% {
         opacity: 0.5;
         transform: scale(0.9);

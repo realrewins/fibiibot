@@ -1,10 +1,13 @@
 {
   "documents": [
     {
-      "id": "xqirby",
+      "id": "xQirby",
       "fields": {
         "username": {
-          "stringValue": "xqirby"
+          "stringValue": "xQirby"
+        },
+        "display_name": {
+          "stringValue": "xQirby"
         },
         "roles": {
           "arrayValue": {
@@ -14,9 +17,6 @@
               }
             ]
           }
-        },
-        "display_name": {
-          "stringValue": "xQirby"
         }
       }
     },
@@ -33,7 +33,7 @@
           "arrayValue": {
             "values": [
               {
-                "stringValue": "viewer"
+                "stringValue": "dev"
               }
             ]
           }
@@ -47,7 +47,7 @@
           "stringValue": "xfibiiwife"
         },
         "display_name": {
-          "stringValue": "xfibiiWife"
+          "stringValue": "xfibiiwife"
         },
         "roles": {
           "arrayValue": {

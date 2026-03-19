@@ -77,7 +77,7 @@ def view_clip(clip_id):
 
 @main_bp.route('/403')
 @login_required
-def 403_page():
+def page_403():
     return render_template('403.html', csrf_token=generate_csrf_token(), user=session['user'], current_page='403')
 
 @main_bp.route('/download/<filename>')
